@@ -206,6 +206,7 @@ const SigninScreen: React.FC = () => {
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
+          keyboardType="email-address"
         />
 
         <AppInput
