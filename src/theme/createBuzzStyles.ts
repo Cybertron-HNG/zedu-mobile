@@ -2168,12 +2168,20 @@ export function createBuzzGreenRoomComponentStyles(colors: ThemeColors) {
   });
 }
 
+/**
+ * Styles for the welcome screen: a centred stack of logo, heading, consent
+ * text and buttons. The stack sits in a ScrollView so it stays reachable on
+ * short screens.
+ */
 export function createWelcomeScreenStyles(colors: ThemeColors) {
   return StyleSheet.create({
     container: {
       flex: 1,
       backgroundColor: colors.surface,
       paddingHorizontal: 25,
+    },
+    scrollContent: {
+      flexGrow: 1,
       justifyContent: 'center',
     },
     topSection: {
