@@ -5,6 +5,15 @@ import {
   getTopVisibleDateLabel,
 } from '../src/hooks/useStickyDateLabel';
 
+// Labels depend on today's date, so pin "today" to keep the expected labels stable
+beforeAll(() => {
+  jest.useFakeTimers({ now: new Date('2026-10-20T12:00:00') });
+});
+
+afterAll(() => {
+  jest.useRealTimers();
+});
+
 const token = (index: number, created_at: string): ViewToken => ({
   index,
   item: { created_at },
@@ -39,6 +48,9 @@ describe('getTopVisibleDateLabel', () => {
 
   test('returns an empty label when nothing is visible', () => {
     expect(getTopVisibleDateLabel([])).toBe('');
+    expect(
+      getTopVisibleDateLabel([], { date: '2026-10-05T10:00:00', lastIndex: 2 }),
+    ).toBe('');
   });
 
   test("uses the thread parent's date once the oldest reply is visible", () => {

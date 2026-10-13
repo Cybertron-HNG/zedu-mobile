@@ -1,4 +1,4 @@
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutChangeEvent, ViewToken } from 'react-native';
 import moment from 'moment';
 
@@ -34,7 +34,7 @@ export const getTopVisibleDateLabel = (
     }
   });
   // The footer isn't in viewableItems, but it sits right above the oldest reply
-  if (parent?.date && (top?.index == null || top.index >= parent.lastIndex)) {
+  if (parent?.date && top?.index != null && top.index >= parent.lastIndex) {
     return formatDateLabel(parent.date);
   }
   return top?.item?.created_at ? formatDateLabel(top.item.created_at) : '';
@@ -43,11 +43,21 @@ export const getTopVisibleDateLabel = (
 export const useStickyDateLabel = (parent?: StickyDateParent) => {
   const [dateLabel, setDateLabel] = useState('');
   const parentRef = useRef(parent);
-  parentRef.current = parent;
+  const visibleRef = useRef<ViewToken[]>([]);
+  const parentDate = parent?.date;
+  const lastIndex = parent?.lastIndex;
+
+  // Refresh the label when the thread parent or reply count changes without a scroll
+  useEffect(() => {
+    parentRef.current =
+      lastIndex == null ? undefined : { date: parentDate, lastIndex };
+    setDateLabel(getTopVisibleDateLabel(visibleRef.current, parentRef.current));
+  }, [parentDate, lastIndex]);
 
   // FlatList doesn't allow these to change between renders, so keep them stable
   const onViewableItemsChanged = useRef(
     ({ viewableItems }: { viewableItems: ViewToken[] }) => {
+      visibleRef.current = viewableItems;
       setDateLabel(getTopVisibleDateLabel(viewableItems, parentRef.current));
     },
   ).current;
