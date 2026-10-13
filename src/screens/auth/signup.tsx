@@ -283,6 +283,7 @@ const SignupScreen: React.FC = () => {
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
+              returnKeyType="done"
             />
 
             <AppInput
@@ -339,6 +340,7 @@ const SignupScreen: React.FC = () => {
               value={email}
               onChangeText={setEmail}
               keyboardType="email-address"
+              returnKeyType="done"
             />
             <AppInput
               label="Password"
