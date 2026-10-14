@@ -1,9 +1,7 @@
 import moment from 'moment';
 import { ViewToken } from 'react-native';
-import {
-  formatDateLabel,
-  getTopVisibleDateLabel,
-} from '../src/hooks/useStickyDateLabel';
+import { formatDateLabel } from '@/lib/date-label';
+import { getTopVisibleDateLabel } from '../src/hooks/useStickyDateLabel';
 
 // Labels depend on today's date, so pin "today" to keep the expected labels stable
 beforeAll(() => {
