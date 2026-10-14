@@ -1,16 +1,23 @@
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { View, TouchableOpacity, ViewStyle } from 'react-native';
 import FastImage from 'react-native-fast-image';
 import { useNavigation } from '@react-navigation/native';
 import { useTheme } from '@/theme/ThemeProvider';
 import { createChannelSetupStyles } from '@/theme/createStep10Styles';
+import { AppText } from '@/components/ui/text';
 import { normalize } from '@/utils/normalize';
+
+// Minimum touch target recommended for tappable elements.
+const MIN_TOUCH_TARGET = 44;
 
 interface UserAvatarProps {
   user: {
     avatar_url?: string;
     default_avatar_url?: string;
     online?: boolean;
+    username?: string;
+    first_name?: string;
+    email?: string;
   };
   size?: number;
   showBadge?: boolean;
@@ -40,19 +47,32 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
     }
   };
 
-  const avatarSource = useMemo(() => {
-    return { uri: user?.avatar_url || user?.default_avatar_url };
-  }, [user?.avatar_url, user?.default_avatar_url]);
+  const avatarUri = user?.avatar_url || user?.default_avatar_url;
+  const avatarSource = useMemo(() => ({ uri: avatarUri }), [avatarUri]);
+
+  const [imageFailed, setImageFailed] = useState(false);
+  useEffect(() => {
+    setImageFailed(false);
+  }, [avatarUri]);
+
+  const showImage = !!avatarUri && !imageFailed;
+  const initial = (user?.username || user?.first_name || user?.email || '?')
+    .charAt(0)
+    .toUpperCase();
+
+  const avatarSize = normalize(size);
+  const slop = Math.max(0, Math.ceil((MIN_TOUCH_TARGET - avatarSize) / 2));
+  const hitSlop = { top: slop, bottom: slop, left: slop, right: slop };
 
   const dynamicStyles = {
     container: {
-      width: normalize(size),
-      height: normalize(size),
+      width: avatarSize,
+      height: avatarSize,
     },
     image: {
-      width: normalize(size),
-      height: normalize(size),
-      borderRadius: normalize(size / 2),
+      width: avatarSize,
+      height: avatarSize,
+      borderRadius: avatarSize / 2,
     },
     badge: {
       width: normalize(size * 0.3),
@@ -67,12 +87,27 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
       style={[styles.avatarContainer, dynamicStyles.container, style]}
       onPress={handlePress}
       activeOpacity={0.8}
+      hitSlop={hitSlop}
+      accessibilityRole="button"
+      accessibilityLabel="Open profile"
     >
-      <FastImage
-        source={avatarSource}
-        style={dynamicStyles.image}
-        resizeMode={FastImage.resizeMode.cover}
-      />
+      {showImage ? (
+        <FastImage
+          source={avatarSource}
+          style={dynamicStyles.image}
+          resizeMode={FastImage.resizeMode.cover}
+          onError={() => setImageFailed(true)}
+        />
+      ) : (
+        <View
+          testID="user-avatar-fallback"
+          style={[styles.fallback, dynamicStyles.image]}
+        >
+          <AppText variant="bold" size={size * 0.4} style={styles.fallbackText}>
+            {initial}
+          </AppText>
+        </View>
+      )}
 
       {showBadge && <View style={[styles.onlineBadge, dynamicStyles.badge]} />}
     </TouchableOpacity>
