@@ -1,17 +1,7 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { LayoutChangeEvent, ViewToken } from 'react-native';
 import moment from 'moment';
-
-// Same wording as the date headers shown between messages
-export const formatDateLabel = (date: moment.MomentInput) =>
-  moment(date).calendar(null, {
-    sameDay: '[Today]',
-    lastDay: '[Yesterday]',
-    lastWeek: 'MMMM D, YYYY',
-    nextDay: 'MMMM D, YYYY',
-    nextWeek: 'MMMM D, YYYY',
-    sameElse: 'MMMM D, YYYY',
-  });
+import { formatDateLabel } from '@/lib/date-label';
 
 // A thread's parent message, shown as the list footer above its oldest reply
 export type StickyDateParent = {
