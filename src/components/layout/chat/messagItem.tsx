@@ -26,6 +26,10 @@ import {
 import { isVoiceMessageMedia } from '@/utils/voice-message';
 import { isVideoFile } from '@/utils/file-helpers';
 import ReactionDetailsSheet from './reaction-details';
+import {
+  getReactionBadgeAlignment,
+  getVisibleReactions,
+} from '@/utils/reaction-badge';
 
 const { width } = Dimensions.get('window');
 
@@ -52,7 +56,6 @@ const MessageItem = ({
 
   const forwardData = getForwardedMessageFromItem(item);
   const showForwardComment = hasForwardComment(item);
-  const hasReactions = Boolean(item.reactions?.length);
 
   const showDateHeader =
     index === messages.length - 1 ||
@@ -170,13 +173,14 @@ const MessageItem = ({
         activeOpacity={0.7}
         delayLongPress={250}
         onLongPress={() => setReactionSheetVisible(true)}
+        testID="reaction-badge"
         style={[
-          styles.reactionBadge,
-          item.sent ? styles.sentReactionPos : styles.receivedReactionPos,
+          styles.reactionBadgeInline,
+          { alignSelf: getReactionBadgeAlignment(Boolean(item.sent)) },
         ]}
       >
         <View style={styles.reactionEmojiRow}>
-          {item.reactions.slice(0, 3).map((r: any, i: number) => (
+          {getVisibleReactions(item.reactions).map((r: any, i: number) => (
             <AppText
               key={r.reaction_id || i}
               style={[
@@ -205,7 +209,6 @@ const MessageItem = ({
     const replyBarStyle = [
       styles.slackThreadContainer,
       item.sent ? styles.replyBarSent : styles.replyBarReceived,
-      hasReactions && { marginTop: 18 },
     ];
 
     return (
@@ -274,6 +277,7 @@ const MessageItem = ({
         ]}
       >
         <View
+          testID="message-bubble"
           style={[
             styles.bubble,
             item.sent ? styles.sentBubble : styles.receivedBubble,
@@ -306,9 +310,10 @@ const MessageItem = ({
               Edited
             </AppText>
           )}
-
-          {renderReactions()}
         </View>
+
+        {/* Rendered below the bubble, in layout flow, so it can never sit on top of the time. */}
+        {renderReactions()}
       </TouchableOpacity>
 
       {item.message_count > 0 && renderReplyParticipants()}
