@@ -37,9 +37,9 @@ target 'Zedu' do
     )
 
     # pnpm installs @sayem314/react-native-keep-awake via symlink; RN codegen
-    # skips symlink dirs and emits empty NativeKCKeepAwakeSpec headers.
-    # Regenerate from the package realpath after post_install, and again as a
-    # build-phase script so Xcode's codegen step cannot overwrite empties.
+    # skips symlink dirs and emits empty NativeKCKeepAwakeSpec headers/impl.
+    # Regenerate from the package realpath after pod install AND after every
+    # "[CP-User] Generate Specs" run (Archive regenerates empty stubs otherwise).
     keep_awake_script = "#{Pod::Config.instance.installation_root}/../scripts/generate-keep-awake-ios-codegen.js"
     system('node', keep_awake_script)
 
@@ -54,10 +54,25 @@ target 'Zedu' do
       end
 
       phase = target.new_shell_script_build_phase('Generate KeepAwake Codegen (pnpm)')
+      # Use NODE_BINARY from ios/.xcode.env(.local) — same as RN's with-environment.sh —
+      # so Archive works when Xcode's PATH has no node.
       phase.shell_script = <<-SCRIPT
+set -e
 export LANG=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
-node "${PODS_ROOT}/../../scripts/generate-keep-awake-ios-codegen.js"
+NODE_BINARY=$(command -v node || echo "")
+ENV_PATH="${PODS_ROOT}/../.xcode.env"
+if [ -f "$ENV_PATH" ]; then
+  . "$ENV_PATH"
+fi
+if [ -f "${ENV_PATH}.local" ]; then
+  . "${ENV_PATH}.local"
+fi
+if [ -z "$NODE_BINARY" ] || [ ! -x "$NODE_BINARY" ]; then
+  echo "error: NODE_BINARY not found. Set it in ios/.xcode.env.local (export NODE_BINARY=/path/to/node)"
+  exit 1
+fi
+"$NODE_BINARY" "${PODS_ROOT}/../../scripts/generate-keep-awake-ios-codegen.js"
 SCRIPT
 
       # Run after "[CP-User] Generate Specs" so we overwrite empty symlink stubs.

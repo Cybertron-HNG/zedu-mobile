@@ -80,8 +80,8 @@ android {
         applicationId "net.emerj.zedu"
         minSdkVersion rootProject.ext.minSdkVersion
         targetSdkVersion rootProject.ext.targetSdkVersion
-        versionCode 21
-        versionName "1.0.5"
+        versionCode 22
+        versionName "1.0.9"
     }
     packaging {
         jniLibs {
