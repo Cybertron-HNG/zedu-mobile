@@ -70,9 +70,12 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   const hitSlop = { top: slop, bottom: slop, left: slop, right: slop };
 
   const dynamicStyles = {
+    // hitSlop can't reach past the parent's bounds on Android, so reserve the
+    // same space as margin to keep the full 44pt target tappable.
     container: {
       width: avatarSize,
       height: avatarSize,
+      margin: slop,
     },
     image: {
       width: avatarSize,

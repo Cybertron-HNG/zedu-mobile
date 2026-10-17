@@ -75,17 +75,48 @@ describe('UserAvatar', () => {
     expect(textOf(renderer)).toContain('E');
   });
 
-  it('keeps the tap area at least 44 points', async () => {
-    const renderer = await render({ username: 'eshiet.eshiet' });
+  it('shows the new image when the avatar url changes after a failure', async () => {
+    const renderer = await render({
+      username: 'eshiet.eshiet',
+      avatar_url: 'https://example.com/broken.png',
+    });
+
+    await ReactTestRenderer.act(() => {
+      renderer.root.findByType(FastImage).props.onError();
+    });
+
+    await ReactTestRenderer.act(() => {
+      renderer.update(
+        <UserAvatar
+          user={{
+            username: 'eshiet.eshiet',
+            avatar_url: 'https://example.com/new.png',
+          }}
+        />,
+      );
+    });
+
+    expect(renderer.root.findByType(FastImage).props.source).toEqual({
+      uri: 'https://example.com/new.png',
+    });
+  });
+
+  it('keeps a 44pt tap area inside the parent bounds', async () => {
+    let renderer!: ReactTestRenderer.ReactTestRenderer;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <UserAvatar user={{ username: 'eshiet.eshiet' }} size={20} />,
+      );
+    });
     const button = renderer.root.findByProps({
       accessibilityLabel: 'Open profile',
     });
-    const { width } = button.props.style.find(
-      (s: { width?: number }) => s && s.width,
-    );
+    const { width, margin } = Object.assign({}, ...button.props.style);
+    const { left, right } = button.props.hitSlop;
 
-    expect(
-      width + button.props.hitSlop.left + button.props.hitSlop.right,
-    ).toBeGreaterThanOrEqual(44);
+    expect(left).toBeGreaterThan(0);
+    expect(width + left + right).toBeGreaterThanOrEqual(44);
+    // hitSlop is only tappable inside the parent, so the margin must cover it.
+    expect(margin).toBe(left);
   });
 });
