@@ -5,15 +5,15 @@
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
 import { Text } from 'react-native';
-import WelcomeScreen from '../src/screens/welcomescreen';
-import { ThemeProvider } from '../src/theme/ThemeProvider';
+import WelcomeScreen from './welcomescreen';
+import { ThemeProvider } from '../theme/ThemeProvider';
 
 jest.mock('@react-navigation/native', () => ({
   ...jest.requireActual('@react-navigation/native'),
   useNavigation: () => ({ navigate: jest.fn() }),
 }));
 
-jest.mock('../src/lib/permissions', () => ({
+jest.mock('../lib/permissions', () => ({
   requestAppPermissions: jest.fn().mockResolvedValue(true),
 }));
 
