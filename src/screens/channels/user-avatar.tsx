@@ -56,9 +56,9 @@ export const UserAvatar: React.FC<UserAvatarProps> = ({
   }, [avatarUri]);
 
   const showImage = !!avatarUri && !imageFailed;
-  const initial = (user?.username || user?.first_name || user?.email || '?')
-    .charAt(0)
-    .toUpperCase();
+  const initial = Array.from(
+    user?.username || user?.first_name || user?.email || '?',
+  )[0].toUpperCase();
 
   const avatarSize = normalize(size);
   const slop = Math.max(0, Math.ceil((MIN_TOUCH_TARGET - avatarSize) / 2));
