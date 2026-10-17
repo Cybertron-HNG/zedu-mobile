@@ -4,6 +4,7 @@
 
 import React from 'react';
 import ReactTestRenderer from 'react-test-renderer';
+import { Text } from 'react-native';
 import { OneSignal } from 'react-native-onesignal';
 import { ThemeProvider } from '@/theme/ThemeProvider';
 import { requestAppPermissions } from '@/lib/permissions';
@@ -84,6 +85,35 @@ describe('WelcomeScreen permissions', () => {
 
     await ReactTestRenderer.act(() => {
       renderer.unmount();
+    });
+  });
+});
+
+describe('WelcomeScreen tagline', () => {
+  it('shows the learning community tagline', async () => {
+    mockRequestAppPermissions.mockResolvedValue(true);
+
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        React.createElement(
+          ThemeProvider,
+          null,
+          React.createElement(WelcomeScreen),
+        ),
+      );
+    });
+
+    const texts = renderer!.root
+      .findAllByType(Text)
+      .map(node => node.props.children);
+    expect(texts).toContain('Built for bootcamps and learning communities');
+    expect(texts).not.toContain(
+      'Seamless video calls and meetings for every learning community.',
+    );
+
+    await ReactTestRenderer.act(() => {
+      renderer?.unmount();
     });
   });
 });
