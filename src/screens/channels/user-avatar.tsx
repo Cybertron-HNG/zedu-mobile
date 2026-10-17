@@ -25,6 +25,11 @@ interface UserAvatarProps {
   style?: ViewStyle;
 }
 
+/**
+ * Circular avatar for the current user. Falls back to the user's initial when
+ * there is no image or it fails to load, and keeps a tap area of at least 44pt.
+ * Opens the Profile screen when pressed unless `onPress` is provided.
+ */
 export const UserAvatar: React.FC<UserAvatarProps> = ({
   user,
   size = 40,

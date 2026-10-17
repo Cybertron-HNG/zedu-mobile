@@ -38,6 +38,17 @@ describe('UserAvatar', () => {
     expect(textOf(renderer)).toContain('E');
   });
 
+  it('keeps a whole emoji as the initial', async () => {
+    const renderer = await render({ username: '😀smile' });
+
+    const texts = renderer.root
+      .findAll(node => typeof node.props.children === 'string')
+      .map(node => node.props.children);
+
+    expect(texts.length).toBeGreaterThan(0);
+    texts.forEach(text => expect(text).toBe('😀'));
+  });
+
   it('renders the avatar image when a url is present', async () => {
     const renderer = await render({
       username: 'eshiet.eshiet',
