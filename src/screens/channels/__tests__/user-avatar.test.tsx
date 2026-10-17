@@ -52,7 +52,7 @@ describe('UserAvatar', () => {
   it('renders the avatar image when a url is present', async () => {
     const renderer = await render({
       username: 'eshiet.eshiet',
-      avatar_url: 'https://example.com/a.png',
+      avatar_url: 'a.png',
     });
 
     expect(renderer.root.findAllByType(FastImage)).toHaveLength(1);
@@ -64,7 +64,7 @@ describe('UserAvatar', () => {
   it('falls back to the initial when the image fails to load', async () => {
     const renderer = await render({
       username: 'eshiet.eshiet',
-      avatar_url: 'https://example.com/broken.png',
+      avatar_url: 'broken.png',
     });
 
     await ReactTestRenderer.act(() => {
@@ -78,7 +78,7 @@ describe('UserAvatar', () => {
   it('shows the new image when the avatar url changes after a failure', async () => {
     const renderer = await render({
       username: 'eshiet.eshiet',
-      avatar_url: 'https://example.com/broken.png',
+      avatar_url: 'broken.png',
     });
 
     await ReactTestRenderer.act(() => {
@@ -90,14 +90,14 @@ describe('UserAvatar', () => {
         <UserAvatar
           user={{
             username: 'eshiet.eshiet',
-            avatar_url: 'https://example.com/new.png',
+            avatar_url: 'new.png',
           }}
         />,
       );
     });
 
     expect(renderer.root.findByType(FastImage).props.source).toEqual({
-      uri: 'https://example.com/new.png',
+      uri: 'new.png',
     });
   });
 
