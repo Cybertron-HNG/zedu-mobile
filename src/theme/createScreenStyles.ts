@@ -77,14 +77,7 @@ export function createSettingsStyles(colors: ThemeColors) {
       backgroundColor: colors.border,
       marginLeft: 62,
     },
-    deleteLink: {
-      alignSelf: 'flex-start',
-      marginTop: 24,
-      marginBottom: 40,
-      paddingVertical: 8,
-      paddingHorizontal: 4,
-    },
-    deleteLinkText: { fontSize: 14, color: colors.textSecondary },
+    dangerCard: { marginTop: 24, marginBottom: 40, borderColor: colors.error },
     statusRow: {
       paddingVertical: 15,
       paddingHorizontal: 16,
