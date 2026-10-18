@@ -43,8 +43,11 @@ type SearchableMember = {
   username?: string;
 };
 
-// Organisation members (the "Add members" pickers) match on name, email or
-// username, like the web people search.
+/**
+ * Whether an organisation member (the "Add members" pickers) matches the
+ * search by name, email or username, like the web people search. Ignores
+ * case and surrounding spaces; an empty search matches everyone.
+ */
 export function memberMatchesSearch(
   member: SearchableMember,
   query: string,
