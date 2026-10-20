@@ -16,9 +16,9 @@ import { createWelcomeScreenStyles } from '@/theme/createBuzzStyles';
 import { useNavigation } from '@react-navigation/native';
 import { requestAndroidNotificationPermission } from '@/services/android-fcm.service';
 import { requestAppPermissions } from '@/lib/permissions';
-import { CLIENT_URL } from '@env';
+import { CLIENT_BASE_URL } from '@/utils/client-url';
 
-const clientBaseUrl = (CLIENT_URL || 'https://zedu.chat').replace(/\/$/, '');
+const clientBaseUrl = CLIENT_BASE_URL;
 
 /**
  * Welcome screen with sign-up and login entry points and the legal links.
