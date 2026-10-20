@@ -92,6 +92,8 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
     const [mode, setMode] = useState<'main' | 'clear'>('main');
     const [clearChoice, setClearChoice] = useState('dont');
     const [loading, setLoading] = useState(false);
+    // Ignores extra taps on ✓ while a save is already in progress.
+    const submittingRef = useRef(false);
     const { state, dispatch } = useDataContext();
     const { user } = state;
 
@@ -124,6 +126,8 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
 
     // handle submit
     const handleSubmit = async () => {
+      if (submittingRef.current) return;
+      submittingRef.current = true;
       setLoading(true);
 
       const payload = {
@@ -137,6 +141,7 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
       const { error } = await PostRequest('/profile/change-status', payload);
 
       setLoading(false);
+      submittingRef.current = false;
       if (error) {
         dispatch({ type: ACTIONS.ERROR, payload: error });
         return;

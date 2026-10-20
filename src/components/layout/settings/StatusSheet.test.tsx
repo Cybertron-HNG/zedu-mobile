@@ -131,4 +131,32 @@ describe('StatusSheet', () => {
       payload: 'Network error',
     });
   });
+
+  it('ignores a second tap on save while the first save is in progress', async () => {
+    let finishSave: (value: any) => void = () => {};
+    mockPostRequest.mockReturnValue(
+      new Promise(resolve => {
+        finishSave = resolve;
+      }) as any,
+    );
+    const onChange = jest.fn();
+    const renderer = await renderSheet(onChange);
+    const save = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'handleSubmit',
+    );
+
+    await ReactTestRenderer.act(async () => {
+      save.props.onPress();
+      save.props.onPress();
+    });
+    await ReactTestRenderer.act(async () => {
+      finishSave({ data: {}, error: null });
+    });
+
+    expect(mockPostRequest).toHaveBeenCalledTimes(1);
+    expect(onChange).toHaveBeenCalledTimes(1);
+  });
 });
