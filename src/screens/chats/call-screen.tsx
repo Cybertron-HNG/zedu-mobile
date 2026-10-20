@@ -163,11 +163,15 @@ const CallScreen = () => {
                 <Ionicons name="happy-outline" size={24} color="#FFF" />
               </TouchableOpacity>
 
-              <TouchableOpacity style={styles.iconCircle}>
+              <TouchableOpacity
+                style={styles.iconCircle}
+                onPress={() => navigation.goBack()}
+              >
                 <MaterialCommunityIcons name="message" size={24} color="#FFF" />
               </TouchableOpacity>
               <TouchableOpacity
                 style={[styles.iconCircle, styles.endCallButton]}
+                onPress={() => navigation.goBack()}
               >
                 <MaterialCommunityIcons
                   name="phone-hangup"
