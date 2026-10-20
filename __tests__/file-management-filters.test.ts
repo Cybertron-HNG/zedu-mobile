@@ -2,7 +2,10 @@
  * @format
  */
 
-import { filterFolders } from '@/utils/file-management-filters';
+import {
+  filterFolders,
+  resolveUploaderIds,
+} from '@/utils/file-management-filters';
 import { Folder } from '@/types/thread';
 
 const folder = (id: string, userId: string, name: string): Folder => ({
@@ -53,5 +56,29 @@ describe('filterFolders "Uploaded By"', () => {
 
   it('shows every folder when the filter is off', () => {
     expect(filterFolders(folders, context)).toHaveLength(2);
+  });
+});
+
+describe('resolveUploaderIds', () => {
+  const members = [
+    { id: 'u1', name: 'sam', username: 'sam' },
+    { id: 'u2', name: 'Samuel Okafor', username: 'samuelo' },
+    { id: 'u3', name: '', username: 'ada' },
+  ];
+
+  it('matches only the member picked from the sheet, not similar names', () => {
+    expect(resolveUploaderIds(members, 'sam')).toEqual(['u1']);
+  });
+
+  it('uses the username when a member has no name', () => {
+    expect(resolveUploaderIds(members, 'ada')).toEqual(['u3']);
+  });
+
+  it('falls back to names and usernames that contain typed text', () => {
+    expect(resolveUploaderIds(members, 'samu')).toEqual(['u2']);
+  });
+
+  it('returns nothing when the filter is empty', () => {
+    expect(resolveUploaderIds(members, '  ')).toEqual([]);
   });
 });

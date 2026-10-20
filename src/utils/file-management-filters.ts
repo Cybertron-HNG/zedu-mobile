@@ -53,3 +53,31 @@ export const filterFolders = (
 
   return sortFolders(result, sortBy);
 };
+
+type UploaderMember = { id: string; name?: string; username?: string };
+
+/**
+ * IDs of the members the "Uploaded By" filter refers to. Picking a member
+ * from the sheet sets the filter to their label (`name || username`), so an
+ * exact label match is used first; a typed search falls back to matching
+ * names and usernames that contain the text, like the server's file search.
+ */
+export const resolveUploaderIds = (
+  members: UploaderMember[],
+  filter: string | null,
+): string[] => {
+  const query = filter?.trim().toLowerCase();
+  if (!query) return [];
+
+  const exact = members.filter(
+    member => (member.name || member.username || '').toLowerCase() === query,
+  );
+  const matches = exact.length
+    ? exact
+    : members.filter(member =>
+        [member.name, member.username].some(value =>
+          (value || '').toLowerCase().includes(query),
+        ),
+      );
+  return matches.map(member => String(member.id));
+};
