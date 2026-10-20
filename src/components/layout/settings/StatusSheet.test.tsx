@@ -159,4 +159,31 @@ describe('StatusSheet', () => {
     expect(mockPostRequest).toHaveBeenCalledTimes(1);
     expect(onChange).toHaveBeenCalledTimes(1);
   });
+
+  it('discards an unsaved preset when the sheet is closed with ✕', async () => {
+    const onChange = jest.fn();
+    const renderer = await renderSheet(onChange);
+    const statusInput = () =>
+      renderer.root.find(
+        node =>
+          typeof node.type !== 'string' &&
+          node.props.placeholder === "What's your status?",
+      );
+
+    await pressPreset(renderer, 'In a meeting');
+    expect(statusInput().props.value).toBe('In a meeting');
+
+    const closeButton = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'close',
+    );
+    await ReactTestRenderer.act(() => {
+      closeButton.props.onPress();
+    });
+
+    expect(statusInput().props.value).toBe('');
+    expect(onChange).not.toHaveBeenCalled();
+  });
 });

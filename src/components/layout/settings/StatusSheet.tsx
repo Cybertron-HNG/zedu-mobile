@@ -97,10 +97,23 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
     const { state, dispatch } = useDataContext();
     const { user } = state;
 
+    // The last saved status, restored when the sheet closes without saving.
+    const savedRef = useRef({ text: '', emoji: '', clearChoice: 'dont' });
+
+    const restoreSaved = () => {
+      setText(savedRef.current.text);
+      setEmoji(savedRef.current.emoji);
+      setClearChoice(savedRef.current.clearChoice);
+      setMode('main');
+    };
+
     useEffect(() => {
-      setText(user?.text);
-      setEmoji(user?.icon);
-      setClearChoice(user?.status_timeout || 'dont');
+      savedRef.current = {
+        text: user?.text || '',
+        emoji: user?.icon || '',
+        clearChoice: user?.status_timeout || 'dont',
+      };
+      restoreSaved();
     }, []);
 
     useImperativeHandle(ref, () => ({
@@ -110,6 +123,7 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
     }));
 
     const close = () => {
+      restoreSaved();
       sheetRef.current?.close();
     };
 
@@ -147,13 +161,19 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
         return;
       }
       // Only update the Settings row once the status is actually saved.
+      savedRef.current = { text, emoji, clearChoice };
       onChange && onChange(emoji, text, clearChoice);
       close();
     };
 
     return (
       <>
-        <AppBottomSheet ref={sheetRef} snapPoints={['98%']} paddingBottom={150}>
+        <AppBottomSheet
+          ref={sheetRef}
+          snapPoints={['98%']}
+          paddingBottom={150}
+          onClose={restoreSaved}
+        >
           <View style={styles.headerRow}>
             <TouchableOpacity
               onPress={mode === 'clear' ? () => setMode('main') : close}
