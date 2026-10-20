@@ -41,6 +41,7 @@ import {
 import { FilesListQueryFilters } from '@/types/files-api';
 import {
   filterFolders,
+  resolveUploaderIds,
   sortFileResults,
 } from '@/utils/file-management-filters';
 
@@ -92,18 +93,11 @@ export const useFileManagement = (navigation: FileManagementNavigation) => {
   const needsFolderPicker = moveSheetVisible || selectionMode;
   const currentUserId = user?.user_id ?? user?.id;
 
-  // Members whose name, username or email matches the "Uploaded By" filter.
-  const uploadedByUserIds = useMemo(() => {
-    const query = uploadedByFilter?.trim().toLowerCase();
-    if (!query) return [];
-    return orgMembers
-      .filter(member =>
-        [member.name, member.username, member.email].some(value =>
-          (value || '').toLowerCase().includes(query),
-        ),
-      )
-      .map(member => String(member.id));
-  }, [orgMembers, uploadedByFilter]);
+  // Members the "Uploaded By" filter refers to; folders are matched by ID.
+  const uploadedByUserIds = useMemo(
+    () => resolveUploaderIds(orgMembers, uploadedByFilter),
+    [orgMembers, uploadedByFilter],
+  );
 
   const filterContext = useMemo(
     () => ({
