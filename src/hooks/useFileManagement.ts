@@ -92,16 +92,38 @@ export const useFileManagement = (navigation: FileManagementNavigation) => {
   const needsFolderPicker = moveSheetVisible || selectionMode;
   const currentUserId = user?.user_id ?? user?.id;
 
+  // Members whose name, username or email matches the "Uploaded By" filter.
+  const uploadedByUserIds = useMemo(() => {
+    const query = uploadedByFilter?.trim().toLowerCase();
+    if (!query) return [];
+    return orgMembers
+      .filter(member =>
+        [member.name, member.username, member.email].some(value =>
+          (value || '').toLowerCase().includes(query),
+        ),
+      )
+      .map(member => String(member.id));
+  }, [orgMembers, uploadedByFilter]);
+
   const filterContext = useMemo(
     () => ({
       mode,
       sortBy,
       uploadedByFilter,
+      uploadedByUserIds,
       dateFilter,
       searchQuery,
       currentUserId,
     }),
-    [mode, sortBy, uploadedByFilter, dateFilter, searchQuery, currentUserId],
+    [
+      mode,
+      sortBy,
+      uploadedByFilter,
+      uploadedByUserIds,
+      dateFilter,
+      searchQuery,
+      currentUserId,
+    ],
   );
 
   const filesApiFilters = useMemo<FilesListQueryFilters>(
