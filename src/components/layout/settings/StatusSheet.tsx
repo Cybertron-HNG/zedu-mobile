@@ -25,6 +25,7 @@ import { useTheme } from '@/theme/ThemeProvider';
 import { createStatusSheetStyles } from '@/theme/createChatOverlayStyles';
 import { useDataContext } from '@/store/useDataContext';
 import { PostRequest } from '@/utils/requests';
+import { ACTIONS } from '@/store/types';
 
 type Props = {
   initialText?: string;
@@ -91,7 +92,7 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
     const [mode, setMode] = useState<'main' | 'clear'>('main');
     const [clearChoice, setClearChoice] = useState('dont');
     const [loading, setLoading] = useState(false);
-    const { state, dispatch: _dispatch } = useDataContext();
+    const { state, dispatch } = useDataContext();
     const { user } = state;
 
     useEffect(() => {
@@ -113,14 +114,12 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
     const handleEmoji = (e: EmojiType) => {
       setEmoji(e.emoji ?? String(e));
       setShowEmojiPicker(false);
-      onChange && onChange(e.emoji ?? String(e), text, clearChoice);
     };
 
     const handlePresetSelection = (item: (typeof PRESET_STATUSES)[0]) => {
       setText(item.label);
       setEmoji(item.emoji);
       setClearChoice(item.clearKey);
-      onChange && onChange(item.emoji, item.label, item.clearKey);
     };
 
     // handle submit
@@ -135,19 +134,16 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
         online: true,
       };
 
-      const { error, data } = await PostRequest(
-        '/profile/change-status',
-        payload,
-      );
+      const { error } = await PostRequest('/profile/change-status', payload);
 
-      console.log(error, data);
-
-      if (!error) {
-        setLoading(false);
-        close();
-      } else {
-        setLoading(false);
+      setLoading(false);
+      if (error) {
+        dispatch({ type: ACTIONS.ERROR, payload: error });
+        return;
       }
+      // Only update the Settings row once the status is actually saved.
+      onChange && onChange(emoji, text, clearChoice);
+      close();
     };
 
     return (
@@ -196,10 +192,7 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
                 </TouchableOpacity>
                 <TextInput
                   value={text}
-                  onChangeText={t => {
-                    setText(t);
-                    onChange && onChange(emoji, t, clearChoice);
-                  }}
+                  onChangeText={setText}
                   placeholder="What's your status?"
                   style={styles.textInput}
                   placeholderTextColor="#ABABAD"
