@@ -1,0 +1,123 @@
+/**
+ * @format
+ */
+
+import React from 'react';
+import { Keyboard } from 'react-native';
+import ReactTestRenderer from 'react-test-renderer';
+import { ThemeProvider } from '@/theme/ThemeProvider';
+import { PatchRequest } from '@/utils/requests';
+import { AddDescription } from '@/components/layout/channels/add-description';
+
+const mockDispatch = jest.fn();
+
+jest.mock('@/utils/requests', () => ({
+  PatchRequest: jest.fn(),
+}));
+
+jest.mock('@/store/useDataContext', () => ({
+  useDataContext: () => ({
+    state: { channelCallback: false, channelDetails: { description: '' } },
+    dispatch: mockDispatch,
+  }),
+}));
+
+// The sheet is native UI; render its children directly.
+jest.mock('@/components/ui/bottom-sheet', () => {
+  const ReactMock = require('react');
+  return {
+    __esModule: true,
+    default: ReactMock.forwardRef(
+      ({ children }: { children: React.ReactNode }, _ref: unknown) => children,
+    ),
+  };
+});
+
+const mockPatchRequest = PatchRequest as jest.MockedFunction<
+  typeof PatchRequest
+>;
+
+// The first render loads the theme and UI modules from cold, which can pass Jest's 5s default in CI.
+jest.setTimeout(30000);
+
+describe('AddDescription', () => {
+  let hideKeyboard: (() => void) | undefined;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+    hideKeyboard = undefined;
+    mockPatchRequest.mockResolvedValue({
+      data: { message: 'Channel updated' },
+      error: null,
+    } as any);
+    jest.spyOn(Keyboard, 'dismiss').mockImplementation(() => {});
+    jest
+      .spyOn(Keyboard, 'addListener')
+      .mockImplementation((_event: any, listener: any) => {
+        hideKeyboard = listener;
+        return { remove: jest.fn() } as any;
+      });
+  });
+
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
+  const renderSheet = async (onClose: jest.Mock) => {
+    let renderer: ReactTestRenderer.ReactTestRenderer | undefined;
+    await ReactTestRenderer.act(() => {
+      renderer = ReactTestRenderer.create(
+        <ThemeProvider>
+          <AddDescription onClose={onClose} channel_id="ch-1" />
+        </ThemeProvider>,
+      );
+    });
+    return renderer as ReactTestRenderer.ReactTestRenderer;
+  };
+
+  const typeAndSave = async (renderer: ReactTestRenderer.ReactTestRenderer) => {
+    const input = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.placeholder === 'Add description',
+    );
+    await ReactTestRenderer.act(() => {
+      input.props.onChangeText('Weekly updates');
+    });
+    const add = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'handleSave',
+    );
+    await ReactTestRenderer.act(async () => {
+      await add.props.onPress();
+    });
+  };
+
+  it('waits for the keyboard to hide before closing the sheet', async () => {
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(true);
+    const onClose = jest.fn();
+    const renderer = await renderSheet(onClose);
+
+    await typeAndSave(renderer);
+
+    expect(Keyboard.dismiss).toHaveBeenCalled();
+    expect(onClose).not.toHaveBeenCalled();
+
+    await ReactTestRenderer.act(() => {
+      hideKeyboard?.();
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes straight away when the keyboard is already hidden', async () => {
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(false);
+    const onClose = jest.fn();
+    const renderer = await renderSheet(onClose);
+
+    await typeAndSave(renderer);
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+});

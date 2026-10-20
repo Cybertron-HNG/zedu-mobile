@@ -47,12 +47,26 @@ export const AddDescription = forwardRef<any, Props>(
         dispatch({ type: ACTIONS.CHANNEL_CALLBACK, payload: !channelCallback });
         dispatch({ type: ACTIONS.SUCCESS, payload: data.message });
 
-        onClose();
+        closeAfterKeyboardHides();
       } else {
         dispatch({ type: ACTIONS.ERROR, payload: error });
       }
 
       setLoading(false);
+    };
+
+    // Closing the sheet while the keyboard is still open lets the sheet
+    // re-open when the keyboard finishes hiding, so wait for it first.
+    const closeAfterKeyboardHides = () => {
+      if (!Keyboard.isVisible()) {
+        onClose();
+        return;
+      }
+      const subscription = Keyboard.addListener('keyboardDidHide', () => {
+        subscription.remove();
+        onClose();
+      });
+      Keyboard.dismiss();
     };
 
     const handleFocus = () => {
