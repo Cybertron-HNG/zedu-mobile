@@ -11,6 +11,9 @@ type FolderFilterContext = Pick<
   'mode' | 'uploadedByFilter' | 'dateFilter' | 'searchQuery' | 'sortBy'
 > & {
   currentUserId?: string;
+  // IDs of the members the "Uploaded By" filter matches. Folders only carry
+  // the owner's user_id, not their name, so they are filtered by these IDs.
+  uploadedByUserIds?: string[];
 };
 
 export const sortFileResults = (
@@ -24,16 +27,19 @@ export const filterFolders = (
   folders: Folder[],
   context: FolderFilterContext,
 ): Folder[] => {
-  const { uploadedByFilter, dateFilter, searchQuery, sortBy } = context;
+  const {
+    uploadedByFilter,
+    uploadedByUserIds,
+    dateFilter,
+    searchQuery,
+    sortBy,
+  } = context;
 
   let result = [...folders];
 
   if (uploadedByFilter) {
-    const query = uploadedByFilter.trim().toLowerCase();
-    result = result.filter(folder => {
-      const ownerLabel = folder.user_id?.toLowerCase() || '';
-      return ownerLabel.includes(query);
-    });
+    const ownerIds = new Set((uploadedByUserIds ?? []).map(String));
+    result = result.filter(folder => ownerIds.has(String(folder.user_id)));
   }
   if (dateFilter !== 'any') {
     result = result.filter(folder =>
