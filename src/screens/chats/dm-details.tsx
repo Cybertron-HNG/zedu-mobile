@@ -190,7 +190,10 @@ const DmDetailsScreen = ({ navigation, route }: any) => {
           <UserProfileStatus user={userData} userId={userData?.user_id} />
 
           <View style={styles.quickActionRow}>
-            <TouchableOpacity style={styles.circleAction}>
+            <TouchableOpacity
+              style={styles.circleAction}
+              onPress={handleDirectCall}
+            >
               <View style={styles.actionIconCircle}>
                 <Ionicons
                   name="call-outline"
@@ -276,7 +279,12 @@ const DmDetailsScreen = ({ navigation, route }: any) => {
               <AppText variant="bold" style={styles.sectionTitle}>
                 Media, Links & Docs
               </AppText>
-              <TouchableOpacity style={styles.mediaCount}>
+              <TouchableOpacity
+                style={styles.mediaCount}
+                onPress={() =>
+                  navigation.navigate('MediaGalleryScreen', { channel_id })
+                }
+              >
                 <AppText size={13} style={{ color: colors.primary }}>
                   {groupDetails?.preview_media?.length}{' '}
                 </AppText>
