@@ -21,6 +21,11 @@ export const useDMs = (
     dmsRef.current = dms;
   }, [dms, callback]);
 
+  // The latest search typed. Answers for an older search are ignored, so a
+  // slow reply can't replace the list after the search changed or was cleared.
+  const latestSearchRef = useRef(search);
+  latestSearchRef.current = search;
+
   const fetchDMs = useCallback(
     async (isInitial: boolean = true, searchQuery: string = search) => {
       if (!orgId) return;
@@ -37,6 +42,8 @@ export const useDMs = (
       const url = `/organisations/${orgId}/dms?page=${currentPage}&limit=${limit}&search=${searchQuery}`;
 
       const { data: response, error } = await GetRequest(url);
+
+      if (searchQuery !== latestSearchRef.current) return;
 
       if (!error && response) {
         const newList = response.data || [];
