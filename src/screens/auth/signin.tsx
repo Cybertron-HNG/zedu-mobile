@@ -44,7 +44,7 @@ const SigninScreen: React.FC = () => {
         });
 
         if (error) {
-          setAppleLoading(false);
+          ShowNotify('Error', error);
           return;
         }
         await storeMultipleData([
@@ -62,9 +62,10 @@ const SigninScreen: React.FC = () => {
         });
       }
     } catch (_e) {
-      // Already logged in signInWithApple
+      ShowNotify('Error', 'Apple sign-in failed. Please try again.');
+    } finally {
+      setAppleLoading(false);
     }
-    setAppleLoading(false);
   };
 
   useEffect(() => {
@@ -73,17 +74,23 @@ const SigninScreen: React.FC = () => {
 
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
+    try {
+      const googleData = await signInWithGoogle();
+      const token = googleData?.idToken;
 
-    const googleData = await signInWithGoogle();
-    const token = googleData?.idToken;
+      if (!token) {
+        return;
+      }
 
-    if (token) {
       const { data, error } = await PostRequest('/auth/google', {
         grant_code: token,
       });
 
       if (error) {
-        setGoogleLoading(false);
+        ShowNotify(
+          'Error',
+          error || 'Google sign-in failed. Please try again.',
+        );
         return;
       }
 
@@ -101,11 +108,14 @@ const SigninScreen: React.FC = () => {
         type: ACTIONS.ORG_DATA,
         payload: data.data.user.organisation,
       });
-
+    } catch (err: any) {
+      if (err?.code === -5 || err?.message?.includes('cancel')) {
+        return;
+      }
+      ShowNotify('Error', 'Google sign-in failed. Please try again.');
+    } finally {
       setGoogleLoading(false);
     }
-
-    setGoogleLoading(false);
   };
 
   const handleLogin = async () => {
