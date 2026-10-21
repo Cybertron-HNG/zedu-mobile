@@ -39,7 +39,7 @@ const DmDetailsScreen = ({ navigation, route }: any) => {
   const userData = directCallee;
 
   const handleDirectCall = async () => {
-    if (!directCallee?.user_id) return;
+    if (!(directCallee?.user_id ?? directCallee?.id)) return;
 
     const activeBuzzData = state?.buzzData;
     if (state?.isCallMinimized && activeBuzzData?.buzz_code) {
@@ -192,6 +192,7 @@ const DmDetailsScreen = ({ navigation, route }: any) => {
           <View style={styles.quickActionRow}>
             <TouchableOpacity
               style={styles.circleAction}
+              disabled={callLoading}
               onPress={handleDirectCall}
             >
               <View style={styles.actionIconCircle}>
@@ -208,6 +209,7 @@ const DmDetailsScreen = ({ navigation, route }: any) => {
 
             <TouchableOpacity
               style={styles.circleAction}
+              disabled={callLoading}
               onPress={handleDirectCall}
             >
               <View style={styles.actionIconCircle}>
