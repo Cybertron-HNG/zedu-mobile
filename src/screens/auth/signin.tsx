@@ -80,6 +80,10 @@ const SigninScreen: React.FC = () => {
       const token = googleData?.idToken;
 
       if (!token) {
+        ShowNotify(
+          'Error',
+          'Google sign-in did not return a token. Please try again.',
+        );
         return;
       }
 
