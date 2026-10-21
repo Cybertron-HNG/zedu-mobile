@@ -160,8 +160,13 @@ const ImageCropperModal = ({
 
       // Simulating crop processing
       setTimeout(() => {
-        onCrop(imagePath);
-        setIsCropping(false);
+        try {
+          onCrop(imagePath);
+        } catch (err) {
+          console.error('Error cropping image:', err);
+        } finally {
+          setIsCropping(false);
+        }
       }, 500);
     } catch (error) {
       console.error('Error cropping image:', error);
