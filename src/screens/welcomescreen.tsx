@@ -88,7 +88,7 @@ const WelcomeScreen: React.FC = () => {
             />
           </View>
           <AppText variant="regular" style={styles.slogan}>
-            Built for bootcamps and learning communities
+            Seamless video calls and meetings for every learning community.
           </AppText>
         </View>
 

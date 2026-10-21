@@ -15,19 +15,11 @@ const createStyles = (colors: ThemeColors) =>
       alignItems: 'center',
       zIndex: 1,
     },
-    // Solid, outlined and lifted so it stays readable on top of messages
     pill: {
-      backgroundColor: colors.surface,
-      borderWidth: StyleSheet.hairlineWidth,
-      borderColor: colors.border,
+      backgroundColor: colors.dateHeaderBackground,
       paddingHorizontal: 12,
       paddingVertical: 4,
       borderRadius: 8,
-      shadowColor: colors.black,
-      shadowOffset: { width: 0, height: 1 },
-      shadowOpacity: 0.12,
-      shadowRadius: 3,
-      elevation: 2,
     },
     text: {
       color: colors.messageMeta,

@@ -82,8 +82,6 @@ const ForgotPasswordEmailScreen: React.FC = () => {
           placeholder="Email"
           value={email}
           onChangeText={setEmail}
-          keyboardType="email-address"
-          returnKeyType="done"
           style={styles.input}
         />
         <AppButton
