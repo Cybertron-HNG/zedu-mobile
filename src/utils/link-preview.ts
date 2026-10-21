@@ -12,7 +12,21 @@ export type LinkPreviewData = {
 };
 
 const URL_IN_TEXT_REGEX =
-  /((?:https?:\/\/|www\.)[^\s<"']+|\b[\w-]+\.(?:com|co|ng|net|org|io|dev|ai|app|cc)(?:\/[^\s<"']*)?)/gi;
+  /((?:https?:\/\/|www\.)[^\s<"']+|\b(?:[\w-]+\.)+(?:com|co|ng|net|org|io|dev|ai|app|cc)\b(?:\/[^\s<"']*)?)/gi;
+
+/**
+ * A bare domain (no http:// or www.) that directly follows "@", a dot, a dash
+ * or a word character is the domain of an email address or the middle of a
+ * longer name, not a link of its own, e.g. the "zedu.com" in "ada@zedu.com".
+ */
+const isEmbeddedBareDomain = (
+  text: string,
+  match: RegExpExecArray,
+): boolean => {
+  if (/^(?:https?:\/\/|www\.)/i.test(match[1])) return false;
+  const previous = text[match.index - 1];
+  return previous !== undefined && /[\w@.-]/.test(previous);
+};
 
 const previewCache = new Map<string, LinkPreviewData | null>();
 
@@ -46,6 +60,7 @@ export function extractMessageUrls(
   URL_IN_TEXT_REGEX.lastIndex = 0;
   let match: RegExpExecArray | null;
   while ((match = URL_IN_TEXT_REGEX.exec(plain)) !== null) {
+    if (isEmbeddedBareDomain(plain, match)) continue;
     const url = normalizeExtractedUrl(match[1]);
     const key = url.replace(/\/$/, '').toLowerCase();
     if (seen.has(key) || exclude.has(key) || isDocumentUrl(url)) {
