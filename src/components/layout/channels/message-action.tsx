@@ -96,7 +96,7 @@ export const MessageAction = forwardRef<
       });
 
       if (!error) {
-        ShowNotify('Success','Message deleted');
+        ShowNotify('Success', 'Message deleted');
         if (ref && 'current' in ref) {
           ref.current?.close();
         }
