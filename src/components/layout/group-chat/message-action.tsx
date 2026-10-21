@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import EmojiPicker from 'rn-emoji-keyboard';
 import { AppText } from '@/components/ui/text';
+import { ShowNotify } from '@/components/ui/toast';
 import { useTheme } from '@/theme/ThemeProvider';
 import {
   createMessageActionStyles,
@@ -100,7 +101,7 @@ export const MessageAction = forwardRef<
         onClose();
       }
     } catch (error) {
-      console.error('Delete failed:', error);
+      ShowNotify('Error', error || 'Failed to delete message');
     } finally {
       setDeleteLoading(false);
     }

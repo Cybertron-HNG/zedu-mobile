@@ -9,6 +9,7 @@ import {
 } from 'react-native';
 import EmojiPicker from 'rn-emoji-keyboard';
 import { AppText } from '@/components/ui/text';
+import { ShowNotify } from '@/components/ui/toast';
 import { useTheme } from '@/theme/ThemeProvider';
 import {
   createMessageActionStyles,
@@ -95,13 +96,13 @@ export const MessageAction = forwardRef<
       });
 
       if (!error) {
-        console.log('Message deleted successfully');
+        ShowNotify('Success','Message deleted');
         if (ref && 'current' in ref) {
           ref.current?.close();
         }
         onClose();
       } else {
-        console.log('Error deleting message:', error);
+        ShowNotify('Error', error || 'Failed to delete message');
       }
     } finally {
       setDeleteLoading(false);
