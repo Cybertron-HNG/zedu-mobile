@@ -154,7 +154,10 @@ export const VoiceRecorder = ({
     if (!hasPermission) {
       isProcessingRef.current = false;
       console.warn('[VoiceRecorder] Microphone permission denied');
-      ShowNotify('Error', 'Microphone permission denied. Please enable it to record audio.');
+      ShowNotify(
+        'Error',
+        'Microphone permission denied. Please enable it to record audio.',
+      );
       return;
     }
 
