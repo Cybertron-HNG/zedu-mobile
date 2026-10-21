@@ -13,6 +13,7 @@ import { AppText } from './text';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import { useTheme } from '@/theme/ThemeProvider';
 import { createImageCropperStyles } from '@/theme/createStep10Styles';
+import { ShowNotify } from '@/components/ui/toast';
 
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 
@@ -164,12 +165,14 @@ const ImageCropperModal = ({
           onCrop(imagePath);
         } catch (err) {
           console.error('Error cropping image:', err);
+          ShowNotify('Error', 'Failed to crop image. Please try again.');
         } finally {
           setIsCropping(false);
         }
       }, 500);
     } catch (error) {
       console.error('Error cropping image:', error);
+      ShowNotify('Error', 'Failed to crop image. Please try again.');
       setIsCropping(false);
     }
   };
