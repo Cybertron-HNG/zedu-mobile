@@ -14,6 +14,7 @@ import AudioRecorderPlayer, {
 } from 'react-native-audio-recorder-player';
 import RNFS from 'react-native-fs';
 import { useTheme } from '@/theme/ThemeProvider';
+import { ShowNotify } from '@/components/ui/toast';
 
 const audioRecorderPlayer = new AudioRecorderPlayer();
 
@@ -153,6 +154,7 @@ export const VoiceRecorder = ({
     if (!hasPermission) {
       isProcessingRef.current = false;
       console.warn('[VoiceRecorder] Microphone permission denied');
+      ShowNotify('Error', 'Microphone permission denied. Please enable it to record audio.');
       return;
     }
 
@@ -201,6 +203,9 @@ export const VoiceRecorder = ({
       if (err instanceof Error) {
         console.error('[VoiceRecorder] Error message:', err.message);
         console.error('[VoiceRecorder] Error name:', err.name);
+        ShowNotify('Error', err.message || 'Could not start recording.');
+      } else {
+        ShowNotify('Error', 'Could not start recording. Please try again.');
       }
     }
   };
@@ -235,6 +240,7 @@ export const VoiceRecorder = ({
     } catch (err) {
       isProcessingRef.current = false;
       console.warn('[VoiceRecorder] stopRecorder failed:', err);
+      ShowNotify('Error', 'Failed to stop recording. Please try again.');
       onRecordingCancelRef.current();
     }
   };
