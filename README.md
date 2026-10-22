@@ -4,6 +4,16 @@ This is a new [**React Native**](https://reactnative.dev) project, bootstrapped 
 
 > **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
 
+## Step 0: Set your environment variables
+
+The app reads five variables from a `.env` file in the project root: `BASE_URL`, `CLIENT_URL`, `CONNECT_URL`, `GOOGLE_CLIENT_ID` and `ONESIGNAL_APP_ID`. Copy the example file (`env.example`) and fill it in:
+
+```sh
+cp env.example .env
+```
+
+`.env` is ignored by git. The values are compiled into the app, so never put a secret in them. If a variable is missing, the app does not stop with an error: it uses `undefined`, so requests go to addresses such as `undefined/token/connection`.
+
 ## Step 1: Start Metro
 
 First, you will need to run **Metro**, the JavaScript build tool for React Native.
