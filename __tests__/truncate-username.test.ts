@@ -5,7 +5,7 @@
 import { Dimensions } from 'react-native';
 import { truncateUsernameForChannel } from '@/utils/truncate-username';
 
-const LONG_NAME = 'Anidu-Hassanat-Oluwaseyi-Adebayo-Cybertron-Team'; // 47 characters
+const LONG_NAME = 'Anidu Hassanat Oluwaseyi Adebayo Cybertron Team'; // 47 characters
 
 const setScreenWidth = (width: number) => {
   jest
