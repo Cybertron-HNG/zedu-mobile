@@ -33,7 +33,7 @@ const AudioPreview = ({ uri, name }: { uri: string; name: string }) => {
           backgroundColor: colors.surfaceElevated,
           gap: 16,
         },
-        engine: { width: 1, height: 1 },
+        engine: { width: 0, height: 0, opacity: 0 },
         name: { color: colors.textPrimary, textAlign: 'center' },
         time: { color: colors.textSecondary, textAlign: 'center' },
         error: { color: colors.error, textAlign: 'center' },
