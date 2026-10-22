@@ -12,7 +12,7 @@ export type LinkPreviewData = {
 };
 
 const URL_IN_TEXT_REGEX =
-  /((?:https?:\/\/|www\.)[^\s<"']+|\b(?:[\w-]+\.)+(?:com|co|ng|net|org|io|dev|ai|app|cc)\b(?:\/[^\s<"']*)?)/gi;
+  /((?:https?:\/\/|www\.)[^\s<"']+|\b(?:[\w-]+\.)+(?:com|co|ng|net|org|io|dev|ai|app|cc)\b(?!\.\w)(?:\/[^\s<"']*)?)/gi;
 
 /**
  * A bare domain (no http:// or www.) that directly follows "@", a dot, a dash

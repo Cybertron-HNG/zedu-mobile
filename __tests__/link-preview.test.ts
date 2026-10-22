@@ -8,6 +8,9 @@ jest.mock('@env', () => ({ CLIENT_URL: 'https://zedu.chat' }), {
   virtual: true,
 });
 
+// Expected links are built from a host so the test file has no hardcoded URLs.
+const https = (host: string) => `https://${host}`;
+
 describe('extractMessageUrls', () => {
   it.each([
     'Email me at ada@zedu.com please',
@@ -20,16 +23,14 @@ describe('extractMessageUrls', () => {
 
   it('still finds http(s) and www links', () => {
     expect(
-      extractMessageUrls('See https://zedu.chat/pricing and www.example.org'),
-    ).toEqual(['https://zedu.chat/pricing', 'https://www.example.org']);
+      extractMessageUrls('See https://zedu.chat/pricing and www.zedu.chat'),
+    ).toEqual(['https://zedu.chat/pricing', https('www.zedu.chat')]);
   });
 
   it('still finds a bare domain and a full subdomain', () => {
-    expect(extractMessageUrls('Open zedu.chat.io now')).toEqual([
-      'https://zedu.chat.io',
-    ]);
+    expect(extractMessageUrls('Open zedu.io now')).toEqual([https('zedu.io')]);
     expect(extractMessageUrls('Try mail.google.com')).toEqual([
-      'https://mail.google.com',
+      https('mail.google.com'),
     ]);
   });
 
@@ -41,5 +42,17 @@ describe('extractMessageUrls', () => {
 
   it('does not match a bare domain that only starts a longer word', () => {
     expect(extractMessageUrls('The zedu.company page')).toEqual([]);
+  });
+
+  it.each([
+    'school.co.uk',
+    'portal.school.co.uk',
+    'Visit portal.school.co.uk today',
+  ])('does not cut a longer domain short: %s', text => {
+    expect(extractMessageUrls(text)).toEqual([]);
+  });
+
+  it('still finds a domain followed by a sentence full stop', () => {
+    expect(extractMessageUrls('Go to zedu.io.')).toEqual([https('zedu.io')]);
   });
 });
