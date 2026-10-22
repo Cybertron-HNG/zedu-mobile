@@ -72,7 +72,10 @@ export const getFileExtension = (
   fileName: string,
   fileType?: string,
 ): string => {
-  const fromName = fileName?.split('.').pop()?.toLowerCase() || '';
+  // Only text after a dot is an extension: "Makefile" and ".gitignore" have
+  // none, so they fall back to the file type.
+  const dot = fileName?.lastIndexOf('.') ?? -1;
+  const fromName = dot > 0 ? fileName.slice(dot + 1).toLowerCase() : '';
   if (fromName) return fromName;
   return (fileType || '').toLowerCase();
 };
