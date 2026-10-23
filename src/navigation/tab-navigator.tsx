@@ -23,7 +23,7 @@ import { useFocusEffect } from '@react-navigation/native';
 import { ACTIONS } from '@/store/types';
 import { BuzzTabStack } from '@/navigation/stacks/buzz/buzz-tab-stack';
 import MentionsScreen from '@/screens/mentions';
-import { clearAllData } from '@/utils/helper';
+import { signOut } from '@/utils/sign-out';
 import { parseOrganisationThreadsResponse } from '@/services/mentions/parse-organisation-threads';
 import { syncRolesAndPermissionsFromApi } from '@/lib/role-permissions';
 import { AppText } from '@/components/ui/text';
@@ -286,14 +286,7 @@ const TabNavigator = ({
         if (!error) {
           dispatch({ type: ACTIONS.USER, payload: data?.data });
         } else {
-          await clearAllData();
-
-          // Dispatch everything at once to prevent partial state UI renders
-          dispatch({ type: ACTIONS.TOKEN, payload: null });
-          dispatch({ type: ACTIONS.USER, payload: null });
-          dispatch({ type: ACTIONS.ORG_DATA, payload: null });
-          dispatch({ type: ACTIONS.DMS, payload: [] });
-          dispatch({ type: ACTIONS.DMS_CHAT, payload: { data: [], page: 1 } });
+          await signOut(dispatch);
         }
       };
       getUser();
@@ -311,14 +304,7 @@ const TabNavigator = ({
           dispatch({ type: ACTIONS.ORG_DATA, payload: data?.data });
           syncRolesAndPermissionsFromApi();
         } else {
-          await clearAllData();
-
-          // Dispatch everything at once to prevent partial state UI renders
-          dispatch({ type: ACTIONS.TOKEN, payload: null });
-          dispatch({ type: ACTIONS.USER, payload: null });
-          dispatch({ type: ACTIONS.ORG_DATA, payload: null });
-          dispatch({ type: ACTIONS.DMS, payload: [] });
-          dispatch({ type: ACTIONS.DMS_CHAT, payload: { data: [], page: 1 } });
+          await signOut(dispatch);
         }
       };
       getOrgData();
