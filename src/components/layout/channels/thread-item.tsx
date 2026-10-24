@@ -125,8 +125,6 @@ const ThreadItem = ({ item, onMentionUser }: any) => {
     return null;
   };
 
-  console.log(item);
-
   //
 
   return (
