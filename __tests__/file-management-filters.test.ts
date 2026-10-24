@@ -5,6 +5,7 @@
 import {
   filterFolders,
   resolveUploaderIds,
+  uploaderLabel,
 } from '@/utils/file-management-filters';
 import { Folder } from '@/types/thread';
 
@@ -84,5 +85,21 @@ describe('resolveUploaderIds', () => {
 
   it('returns nothing when the filter is empty', () => {
     expect(resolveUploaderIds(members, '  ')).toEqual([]);
+  });
+});
+
+describe('uploaderLabel', () => {
+  it('uses the name, then the username', () => {
+    expect(uploaderLabel({ id: 'u1', name: 'Sam', username: 'sam' })).toBe(
+      'Sam',
+    );
+    expect(uploaderLabel({ id: 'u3', name: '', username: 'ada' })).toBe('ada');
+  });
+
+  it('falls back to the email, then the ID, so the label is never empty', () => {
+    expect(uploaderLabel({ id: 'u4', email: 'kemi@example.com' })).toBe(
+      'kemi@example.com',
+    );
+    expect(uploaderLabel({ id: 'u5' })).toBe('u5');
   });
 });
