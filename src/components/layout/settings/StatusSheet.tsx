@@ -116,6 +116,16 @@ const StatusSheet = forwardRef<AppBottomSheetRef, Props>(
       restoreSaved();
     }, []);
 
+    // Keeps the saved status current when the user loads or changes later,
+    // without touching what is being edited.
+    useEffect(() => {
+      savedRef.current = {
+        text: user?.text || '',
+        emoji: user?.icon || '',
+        clearChoice: user?.status_timeout || 'dont',
+      };
+    }, [user?.text, user?.icon, user?.status_timeout]);
+
     useImperativeHandle(ref, () => ({
       expand: () => sheetRef.current?.expand(),
       close: () => sheetRef.current?.close(),

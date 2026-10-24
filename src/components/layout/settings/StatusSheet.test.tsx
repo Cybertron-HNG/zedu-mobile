@@ -10,6 +10,8 @@ import { ACTIONS } from '@/store/types';
 import StatusSheet from '@/components/layout/settings/StatusSheet';
 
 const mockDispatch = jest.fn();
+const savedUser = { text: '', icon: '', status_timeout: 'dont' };
+let mockUser: typeof savedUser | null = savedUser;
 
 jest.mock('@/utils/requests', () => ({
   PostRequest: jest.fn(),
@@ -17,7 +19,7 @@ jest.mock('@/utils/requests', () => ({
 
 jest.mock('@/store/useDataContext', () => ({
   useDataContext: () => ({
-    state: { user: { text: '', icon: '', status_timeout: 'dont' } },
+    state: { user: mockUser },
     dispatch: mockDispatch,
   }),
 }));
@@ -45,6 +47,7 @@ jest.setTimeout(30000);
 describe('StatusSheet', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUser = savedUser;
   });
 
   const renderSheet = async (onChange: jest.Mock) => {
@@ -184,6 +187,41 @@ describe('StatusSheet', () => {
     });
 
     expect(statusInput().props.value).toBe('');
+    expect(onChange).not.toHaveBeenCalled();
+  });
+
+  it('restores the status that loads after the sheet opens when closed with ✕', async () => {
+    mockUser = null;
+    const onChange = jest.fn();
+    const renderer = await renderSheet(onChange);
+    const statusInput = () =>
+      renderer.root.find(
+        node =>
+          typeof node.type !== 'string' &&
+          node.props.placeholder === "What's your status?",
+      );
+
+    mockUser = { text: 'On holiday', icon: '🌴', status_timeout: 'dont' };
+    await ReactTestRenderer.act(() => {
+      renderer.update(
+        <ThemeProvider>
+          <StatusSheet onChange={onChange} />
+        </ThemeProvider>,
+      );
+    });
+
+    await pressPreset(renderer, 'In a meeting');
+    const closeButton = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'close',
+    );
+    await ReactTestRenderer.act(() => {
+      closeButton.props.onPress();
+    });
+
+    expect(statusInput().props.value).toBe('On holiday');
     expect(onChange).not.toHaveBeenCalled();
   });
 });
