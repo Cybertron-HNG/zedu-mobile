@@ -1,8 +1,7 @@
 import { CLIENT_URL } from '@env';
 
-// Web app origin used for links that open in the browser. Falls back to the
-// production site when CLIENT_URL is not set; no trailing slash.
-export const CLIENT_BASE_URL = (CLIENT_URL || 'https://zedu.chat').replace(
-  /\/$/,
-  '',
-);
+/** Returns the configured web origin without trailing slashes. */
+export const normalizeClientBaseUrl = (clientUrl?: string): string =>
+  (clientUrl || 'https://zedu.chat').replace(/\/+$/, '');
+
+export const CLIENT_BASE_URL = normalizeClientBaseUrl(CLIENT_URL);
