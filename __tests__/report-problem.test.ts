@@ -15,6 +15,34 @@ describe('buildReportProblemUrl', () => {
     expect(url).toContain(`Platform: ${Platform.OS} `);
   });
 
+  it('adds the phone model on Android', () => {
+    const os = Object.getOwnPropertyDescriptor(Platform, 'OS');
+    const constants = Object.getOwnPropertyDescriptor(Platform, 'constants');
+    Object.defineProperty(Platform, 'OS', {
+      get: () => 'android',
+      configurable: true,
+    });
+    Object.defineProperty(Platform, 'constants', {
+      get: () => ({ Brand: 'google', Model: 'Pixel 7' }),
+      configurable: true,
+    });
+
+    try {
+      expect(decodeURIComponent(buildReportProblemUrl())).toContain(
+        'Phone model: google Pixel 7',
+      );
+    } finally {
+      if (os) Object.defineProperty(Platform, 'OS', os);
+      if (constants) Object.defineProperty(Platform, 'constants', constants);
+    }
+  });
+
+  it('leaves the phone model out where it is not available', () => {
+    expect(decodeURIComponent(buildReportProblemUrl())).not.toContain(
+      'Phone model:',
+    );
+  });
+
   it('leaves room for the person to describe the problem', () => {
     expect(decodeURIComponent(buildReportProblemUrl())).toContain(
       'What went wrong?',

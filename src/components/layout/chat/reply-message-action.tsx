@@ -308,6 +308,7 @@ export const ReplyMessageAction = forwardRef<
 
       <AppBottomSheet
         ref={ref}
+        index={itemKey ? 0 : -1}
         snapPoints={mode === 'delete' ? ['40%'] : ['65%']}
         paddingBottom={normalize(110)}
         onClose={() => {

@@ -41,12 +41,14 @@ const SettingsHome = () => {
     subtitle,
     onPress,
     showChevron = true,
+    isDestructive = false,
   }: {
     icon: string;
     title: string;
     subtitle?: string;
     onPress?: () => void;
     showChevron?: boolean;
+    isDestructive?: boolean;
   }) => (
     <TouchableOpacity
       style={styles.itemRow}
@@ -54,7 +56,11 @@ const SettingsHome = () => {
       activeOpacity={0.7}
     >
       <View style={styles.iconContainer}>
-        <Ionicons name={icon} size={20} color={colors.primary} />
+        <Ionicons
+          name={icon}
+          size={20}
+          color={isDestructive ? colors.error : colors.primary}
+        />
       </View>
       <View style={styles.textContainer}>
         <AppText variant="medium" style={styles.itemTitle}>
@@ -264,15 +270,18 @@ const SettingsHome = () => {
             />
           </View>
 
-          <TouchableOpacity
-            style={styles.deleteLink}
-            activeOpacity={0.7}
-            onPress={() =>
-              navigation.navigate('SettingStack', { screen: 'DeleteAccount' })
-            }
-          >
-            <AppText style={styles.deleteLinkText}>Delete account</AppText>
-          </TouchableOpacity>
+          <View style={[styles.groupCard, styles.dangerCard]}>
+            <SettingItem
+              icon="trash-outline"
+              title="Delete account"
+              subtitle="Permanently deletes your account and data"
+              isDestructive
+              showChevron={false}
+              onPress={() =>
+                navigation.navigate('SettingStack', { screen: 'DeleteAccount' })
+              }
+            />
+          </View>
         </View>
 
         <LogoutConfirmationModal
