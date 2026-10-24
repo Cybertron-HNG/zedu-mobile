@@ -194,6 +194,19 @@ describe('AddDescription', () => {
       jest.advanceTimersByTime(600);
     });
     expect(onClose).toHaveBeenCalledTimes(1);
+    // Still disabled while the sheet animates closed.
+    expect(add.props.disabled).toBe(true);
+
+    // The sheet reports it has closed; Add works again next time it opens.
+    const sheet = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onClose &&
+        node.props.onClose.name === 'handleClose',
+    );
+    await ReactTestRenderer.act(() => {
+      sheet.props.onClose();
+    });
     expect(add.props.disabled).toBe(false);
   });
 });
