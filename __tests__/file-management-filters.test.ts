@@ -67,14 +67,18 @@ describe('resolveUploaderIds', () => {
   ];
 
   it('matches only the member picked from the sheet, not similar names', () => {
-    expect(resolveUploaderIds(members, 'sam')).toEqual(['u1']);
+    expect(resolveUploaderIds(members, 'sam', 'u1')).toEqual(['u1']);
   });
 
-  it('uses the username when a member has no name', () => {
+  it('keeps every partial match for typed text, even when one name is exact', () => {
+    expect(resolveUploaderIds(members, 'sam')).toEqual(['u1', 'u2']);
+  });
+
+  it('matches typed text against usernames when a member has no name', () => {
     expect(resolveUploaderIds(members, 'ada')).toEqual(['u3']);
   });
 
-  it('falls back to names and usernames that contain typed text', () => {
+  it('matches names and usernames that contain typed text', () => {
     expect(resolveUploaderIds(members, 'samu')).toEqual(['u2']);
   });
 
