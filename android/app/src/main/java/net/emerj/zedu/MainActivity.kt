@@ -25,12 +25,14 @@ class MainActivity : ReactActivity() {
     // See: https://github.com/software-mansion/react-native-screens/issues/17
     super.onCreate(null)
     handleIncomingCallIntent(intent)
+    FirebasePushModule.captureOpenedNotification(intent)
   }
 
   override fun onNewIntent(intent: Intent) {
     super.onNewIntent(intent)
     setIntent(intent)
     handleIncomingCallIntent(intent)
+    FirebasePushModule.captureOpenedNotification(intent)
   }
 
   private fun handleIncomingCallIntent(intent: Intent?) {

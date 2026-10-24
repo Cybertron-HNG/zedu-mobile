@@ -7,6 +7,7 @@ import {
   TextInput,
   FlatList,
   ActivityIndicator,
+  Platform,
 } from 'react-native';
 import { ThemedRefreshControl } from '@/components/ui/themed-refresh-control';
 import { AppText } from '@/components/ui/text';
@@ -56,6 +57,10 @@ const HomeScreen = () => {
   ];
 
   useEffect(() => {
+    if (Platform.OS !== 'ios') {
+      return;
+    }
+
     const getData = async () => {
       OneSignal.initialize(ONESIGNAL_APP_ID);
       const deviceToken = await OneSignal.User.pushSubscription.getIdAsync();

@@ -92,6 +92,10 @@ import {
   handleMessageNotificationClick,
 } from '@/services/notification-navigation.service';
 import {
+  registerAndroidPushToken,
+  subscribeAndroidPush,
+} from '@/services/android-fcm.service';
+import {
   extractDirectCallCancelDetails,
   extractDirectCallAnsweredElsewhereDetails,
   handleIncomingDirectCallCancelled,
@@ -216,9 +220,14 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
     isInitializedRef.current && hasTokenRef.current;
 
   useEffect(() => {
-    OneSignal.initialize(ONESIGNAL_APP_ID);
-    OneSignal.Notifications.requestPermission(true);
+    if (Platform.OS !== 'android' || !state?.token) {
+      return;
+    }
 
+    registerAndroidPushToken().catch(() => {});
+  }, [state?.token]);
+
+  useEffect(() => {
     const isDirectCallNotification = (notification: any) => {
       const payload =
         notification?.additionalData ||
@@ -529,11 +538,30 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
       event.getNotification().display();
     };
 
-    OneSignal.Notifications.addEventListener('click', onClickListener);
-    OneSignal.Notifications.addEventListener(
-      'foregroundWillDisplay',
-      onForegroundDisplayListener,
-    );
+    let unsubscribePush = () => {};
+
+    if (Platform.OS === 'android') {
+      unsubscribePush = subscribeAndroidPush({
+        onOpened: notification => {
+          onClickListener({ notification }).catch(() => {});
+        },
+        onForeground: notification => {
+          onForegroundDisplayListener({
+            notification,
+            preventDefault: () => {},
+            getNotification: () => ({ display: () => {} }),
+          }).catch(() => {});
+        },
+      });
+    } else {
+      OneSignal.initialize(ONESIGNAL_APP_ID);
+      OneSignal.Notifications.requestPermission(true);
+      OneSignal.Notifications.addEventListener('click', onClickListener);
+      OneSignal.Notifications.addEventListener(
+        'foregroundWillDisplay',
+        onForegroundDisplayListener,
+      );
+    }
 
     let unsubscribeNativeIncomingCall: () => void = () => {};
     let unsubscribeNativeIncomingCallCancelled: () => void = () => {};
@@ -567,11 +595,14 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
     }
 
     return () => {
-      OneSignal.Notifications.removeEventListener('click', onClickListener);
-      OneSignal.Notifications.removeEventListener(
-        'foregroundWillDisplay',
-        onForegroundDisplayListener,
-      );
+      unsubscribePush();
+      if (Platform.OS !== 'android') {
+        OneSignal.Notifications.removeEventListener('click', onClickListener);
+        OneSignal.Notifications.removeEventListener(
+          'foregroundWillDisplay',
+          onForegroundDisplayListener,
+        );
+      }
       unsubscribeNativeIncomingCall();
       unsubscribeNativeIncomingCallCancelled();
     };
