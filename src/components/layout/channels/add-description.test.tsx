@@ -209,4 +209,57 @@ describe('AddDescription', () => {
     });
     expect(add.props.disabled).toBe(false);
   });
+
+  it('does not close the sheet again when a save finishes after Cancel', async () => {
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(false);
+    let finishSave: (value: any) => void = () => {};
+    mockPatchRequest.mockReturnValue(
+      new Promise(resolve => {
+        finishSave = resolve;
+      }) as any,
+    );
+    const onClose = jest.fn();
+    const renderer = await renderSheet(onClose);
+    const input = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.placeholder === 'Add description',
+    );
+    await ReactTestRenderer.act(() => {
+      input.props.onChangeText('Weekly updates');
+    });
+    const add = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'handleSave',
+    );
+    const cancel = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'handleClose',
+    );
+
+    // Start the save, then Cancel while it is still in flight.
+    await ReactTestRenderer.act(() => {
+      add.props.onPress();
+    });
+    await ReactTestRenderer.act(() => {
+      cancel.props.onPress();
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    await ReactTestRenderer.act(async () => {
+      finishSave({ data: { message: 'Channel updated' }, error: null });
+    });
+
+    // The save still succeeds, but the (possibly reopened) sheet stays open
+    // and Add is usable.
+    expect(mockDispatch).toHaveBeenCalledWith(
+      expect.objectContaining({ payload: 'Channel updated' }),
+    );
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(add.props.disabled).toBe(false);
+  });
 });

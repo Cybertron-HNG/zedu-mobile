@@ -35,6 +35,9 @@ export const AddDescription = forwardRef<any, Props>(
     // It is cleared in handleClose, which the sheet calls once it has fully
     // closed, so Add stays disabled during the dismiss animation too.
     const [closing, setClosing] = useState(false);
+    // Goes up every time the sheet closes, so a save that finishes after the
+    // sheet was closed (and maybe reopened) doesn't close it again.
+    const sheetSessionRef = useRef(0);
     const { state, dispatch } = useDataContext();
     const { channelCallback, channelDetails } = state;
     const [snapPoints, setSnapPoints] = useState(['35%']);
@@ -45,6 +48,7 @@ export const AddDescription = forwardRef<any, Props>(
 
     const handleSave = async () => {
       if (!description.trim() || closing) return;
+      const sheetSession = sheetSessionRef.current;
       setLoading(true);
 
       const { data, error } = await PatchRequest(`/channels/${channel_id}`, {
@@ -55,8 +59,10 @@ export const AddDescription = forwardRef<any, Props>(
         dispatch({ type: ACTIONS.CHANNEL_CALLBACK, payload: !channelCallback });
         dispatch({ type: ACTIONS.SUCCESS, payload: data.message });
 
-        setClosing(true);
-        closeAfterKeyboardHides();
+        if (sheetSession === sheetSessionRef.current) {
+          setClosing(true);
+          closeAfterKeyboardHides();
+        }
       } else {
         dispatch({ type: ACTIONS.ERROR, payload: error });
       }
@@ -104,6 +110,7 @@ export const AddDescription = forwardRef<any, Props>(
     };
 
     const handleClose = () => {
+      sheetSessionRef.current += 1;
       cancelPendingClose();
       setClosing(false);
       onClose();
