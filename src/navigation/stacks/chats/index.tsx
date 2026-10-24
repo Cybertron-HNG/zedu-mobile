@@ -1,8 +1,6 @@
 import React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
-import CallScreen from '@/screens/chats/call-screen';
 import ChatDetailScreen from '@/screens/chats/chatdetails';
-import GroupCallScreen from '@/screens/chats/group-call-screen';
 import GroupChatDetailScreen from '@/screens/chats/groupchatdetails';
 import { GroupAddMembersScreen } from '@/screens/chats/group-add-members';
 import { AddMemberScreen } from '@/screens/chats/add-member';
@@ -20,13 +18,11 @@ export type ChatStackParamList = {
     restore_dms_chat?: any[];
     fromNotification?: boolean;
   };
-  CallScreen: undefined;
   GroupChatDetails: {
     participant_id?: string;
     channel_id: string;
     fromNotification?: boolean;
   };
-  GroupCallScreen: undefined;
   GroupAddMembersScreen: undefined;
   GroupAddNewMembers: {
     channel_id: string;
@@ -76,9 +72,7 @@ export const ChatStack = () => (
     }}
   >
     <Stack.Screen name="ChatDetails" component={ChatDetailScreen} />
-    <Stack.Screen name="CallScreen" component={CallScreen} />
     <Stack.Screen name="GroupChatDetails" component={GroupChatDetailScreen} />
-    <Stack.Screen name="GroupCallScreen" component={GroupCallScreen} />
     <Stack.Screen
       name="GroupAddMembersScreen"
       component={GroupAddMembersScreen}
