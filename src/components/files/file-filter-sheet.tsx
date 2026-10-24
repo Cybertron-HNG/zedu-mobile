@@ -30,7 +30,11 @@ type FileFilterSheetProps = {
   sheetUsers: Array<{ id: string; name?: string; username?: string }>;
   onSheetSearchChange: (value: string) => void;
   onFileTypeFilterChange: (value: FileCategory | null) => void;
-  onUploadedByFilterChange: (value: string | null) => void;
+  // memberId is passed only when a member is picked, not for typed text.
+  onUploadedByFilterChange: (
+    value: string | null,
+    memberId?: string | null,
+  ) => void;
   onDateFilterChange: (value: DateFilterKey) => void;
   onSortByChange: (value: FileSortOption) => void;
   onClose: () => void;
@@ -184,7 +188,9 @@ const FileFilterSheet: React.FC<FileFilterSheetProps> = ({
                       key={member.id}
                       style={styles.sheetItem}
                       onPress={() =>
-                        closeAnd(() => onUploadedByFilterChange(label))
+                        closeAnd(() =>
+                          onUploadedByFilterChange(label, String(member.id)),
+                        )
                       }
                     >
                       <View style={styles.sheetAvatar}>
