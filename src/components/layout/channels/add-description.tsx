@@ -30,6 +30,9 @@ export const AddDescription = forwardRef<any, Props>(
     const styles = useMemo(() => createAddDescriptionStyles(colors), [colors]);
     const [description, setDescription] = useState('');
     const [loading, setLoading] = useState(false);
+    // True after a successful save until the sheet has closed, so Add can't
+    // send the same save again while the sheet waits for the keyboard.
+    const [closing, setClosing] = useState(false);
     const { state, dispatch } = useDataContext();
     const { channelCallback, channelDetails } = state;
     const [snapPoints, setSnapPoints] = useState(['35%']);
@@ -39,7 +42,7 @@ export const AddDescription = forwardRef<any, Props>(
     }, []);
 
     const handleSave = async () => {
-      if (!description.trim()) return;
+      if (!description.trim() || closing) return;
       setLoading(true);
 
       const { data, error } = await PatchRequest(`/channels/${channel_id}`, {
@@ -50,6 +53,7 @@ export const AddDescription = forwardRef<any, Props>(
         dispatch({ type: ACTIONS.CHANNEL_CALLBACK, payload: !channelCallback });
         dispatch({ type: ACTIONS.SUCCESS, payload: data.message });
 
+        setClosing(true);
         closeAfterKeyboardHides();
       } else {
         dispatch({ type: ACTIONS.ERROR, payload: error });
@@ -71,17 +75,22 @@ export const AddDescription = forwardRef<any, Props>(
     // re-open when the keyboard finishes hiding, so wait for it first.
     // Android 10 and below may never send keyboardDidHide, so close after
     // KEYBOARD_HIDE_TIMEOUT_MS anyway.
+    const finishClose = () => {
+      setClosing(false);
+      onClose();
+    };
+
     const closeAfterKeyboardHides = () => {
       cancelPendingClose();
       if (!Keyboard.isVisible()) {
-        onClose();
+        finishClose();
         return;
       }
       // Runs once: whichever of the event or the timer comes first closes.
       const finish = () => {
         if (pendingCloseRef.current !== cleanup) return;
         cancelPendingClose();
-        onClose();
+        finishClose();
       };
       const subscription = Keyboard.addListener('keyboardDidHide', finish);
       const timer = setTimeout(finish, KEYBOARD_HIDE_TIMEOUT_MS);
@@ -99,6 +108,7 @@ export const AddDescription = forwardRef<any, Props>(
 
     const handleClose = () => {
       cancelPendingClose();
+      setClosing(false);
       onClose();
       Keyboard.dismiss();
       setSnapPoints(['35%']);
@@ -125,7 +135,7 @@ export const AddDescription = forwardRef<any, Props>(
 
             <TouchableOpacity
               onPress={handleSave}
-              disabled={description === '' || loading}
+              disabled={description === '' || loading || closing}
               style={{ flexDirection: 'row', alignItems: 'center', gap: 5 }}
             >
               {loading && (

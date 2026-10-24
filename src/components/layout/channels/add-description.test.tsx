@@ -170,4 +170,30 @@ describe('AddDescription', () => {
     });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
+
+  it('does not save again while the sheet waits for the keyboard to hide', async () => {
+    jest.useFakeTimers();
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(true);
+    const onClose = jest.fn();
+    const renderer = await renderSheet(onClose);
+
+    await typeAndSave(renderer);
+    const add = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'handleSave',
+    );
+    expect(add.props.disabled).toBe(true);
+    await ReactTestRenderer.act(async () => {
+      await add.props.onPress();
+    });
+    expect(mockPatchRequest).toHaveBeenCalledTimes(1);
+
+    await ReactTestRenderer.act(() => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(add.props.disabled).toBe(false);
+  });
 });
