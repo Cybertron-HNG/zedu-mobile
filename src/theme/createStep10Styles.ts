@@ -415,6 +415,14 @@ export function createChannelSetupStyles(colors: ThemeColors) {
         borderWidth: 2,
         borderColor: colors.white,
       },
+      fallback: {
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: colors.primary,
+      },
+      fallbackText: {
+        color: colors.white,
+      },
     }),
   };
 }
