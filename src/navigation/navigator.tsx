@@ -50,8 +50,6 @@ import { retrieveMultipleData } from '@/utils/helper';
 import { useDataContext } from '@/store/useDataContext';
 import { ACTIONS } from '@/store/types';
 import { Platform, AppState, AppStateStatus } from 'react-native';
-import { OneSignal } from 'react-native-onesignal';
-import { ONESIGNAL_APP_ID } from '@env';
 import { ShowNotify } from '@/components/ui/toast';
 import { BuzzStack, BuzzStackParamList } from './stacks/buzz';
 import { MentionStack, MentionStackParamList } from './stacks/mentions';
@@ -220,7 +218,7 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
     isInitializedRef.current && hasTokenRef.current;
 
   useEffect(() => {
-    if (Platform.OS !== 'android' || !state?.token) {
+    if (!state?.token) {
       return;
     }
 
@@ -516,7 +514,7 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
         event.preventDefault();
         if (Platform.OS === 'ios') {
           console.warn(
-            '[OneSignal] direct call notification received on iOS — check VoIP Push logs separately',
+            '[Firebase] direct call notification received on iOS — VoIP push handles the ring',
           );
         } else {
           await processIncomingCallInvite(event?.notification);
@@ -538,30 +536,18 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
       event.getNotification().display();
     };
 
-    let unsubscribePush = () => {};
-
-    if (Platform.OS === 'android') {
-      unsubscribePush = subscribeAndroidPush({
-        onOpened: notification => {
-          onClickListener({ notification }).catch(() => {});
-        },
-        onForeground: notification => {
-          onForegroundDisplayListener({
-            notification,
-            preventDefault: () => {},
-            getNotification: () => ({ display: () => {} }),
-          }).catch(() => {});
-        },
-      });
-    } else {
-      OneSignal.initialize(ONESIGNAL_APP_ID);
-      OneSignal.Notifications.requestPermission(true);
-      OneSignal.Notifications.addEventListener('click', onClickListener);
-      OneSignal.Notifications.addEventListener(
-        'foregroundWillDisplay',
-        onForegroundDisplayListener,
-      );
-    }
+    const unsubscribePush = subscribeAndroidPush({
+      onOpened: notification => {
+        onClickListener({ notification }).catch(() => {});
+      },
+      onForeground: notification => {
+        onForegroundDisplayListener({
+          notification,
+          preventDefault: () => {},
+          getNotification: () => ({ display: () => {} }),
+        }).catch(() => {});
+      },
+    });
 
     let unsubscribeNativeIncomingCall: () => void = () => {};
     let unsubscribeNativeIncomingCallCancelled: () => void = () => {};
@@ -596,13 +582,6 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
 
     return () => {
       unsubscribePush();
-      if (Platform.OS !== 'android') {
-        OneSignal.Notifications.removeEventListener('click', onClickListener);
-        OneSignal.Notifications.removeEventListener(
-          'foregroundWillDisplay',
-          onForegroundDisplayListener,
-        );
-      }
       unsubscribeNativeIncomingCall();
       unsubscribeNativeIncomingCallCancelled();
     };

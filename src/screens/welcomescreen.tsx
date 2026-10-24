@@ -1,12 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import {
-  View,
-  Image,
-  StatusBar,
-  Alert,
-  Linking,
-  Platform,
-} from 'react-native';
+import { View, Image, StatusBar, Alert, Linking } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { AppText } from '../components/ui/text';
 import { AppButton } from '../components/ui/button';
@@ -14,7 +7,6 @@ import { normalize } from '../utils/normalize';
 import { useTheme } from '@/theme/ThemeProvider';
 import { createWelcomeScreenStyles } from '@/theme/createBuzzStyles';
 import { useNavigation } from '@react-navigation/native';
-import { OneSignal } from 'react-native-onesignal';
 import { requestAndroidNotificationPermission } from '@/services/android-fcm.service';
 import { requestAppPermissions } from '@/lib/permissions';
 import { CLIENT_URL } from '@env';
@@ -39,11 +31,7 @@ const WelcomeScreen: React.FC = () => {
     try {
       // Request camera + audio permissions immediately on welcome screen
       const granted = await requestAppPermissions();
-      if (Platform.OS === 'android') {
-        await requestAndroidNotificationPermission();
-      } else {
-        await OneSignal.Notifications.requestPermission(true);
-      }
+      await requestAndroidNotificationPermission();
       if (granted) {
         setPermissionsGranted(true);
       } else {

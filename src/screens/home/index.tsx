@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   View,
   Image,
@@ -7,7 +7,6 @@ import {
   TextInput,
   FlatList,
   ActivityIndicator,
-  Platform,
 } from 'react-native';
 import { ThemedRefreshControl } from '@/components/ui/themed-refresh-control';
 import { AppText } from '@/components/ui/text';
@@ -26,9 +25,7 @@ import { Chat } from '@/types/chats';
 import { ACTIONS } from '@/store/types';
 import UseGetOrg from '@/services/org/get-org';
 import GeneralNotificationConnection from '@/centrifugoo/general-notification-connection';
-import { OneSignal } from 'react-native-onesignal';
-import { ONESIGNAL_APP_ID } from '@env';
-import { PostRequest, PutRequest } from '@/utils/requests';
+import { PostRequest } from '@/utils/requests';
 import { RootStackParamList } from '@/navigation/navigator';
 import { UserAvatarWithStatus } from '@/components/ui/user-avatar-with-status';
 import { formatPreviewMessage } from '@/utils/message-text';
@@ -55,21 +52,6 @@ const HomeScreen = () => {
     { id: 'Groups', label: `Groups  ${groupCount}` },
     { id: 'Favorites', label: 'Favorites' },
   ];
-
-  useEffect(() => {
-    if (Platform.OS !== 'ios') {
-      return;
-    }
-
-    const getData = async () => {
-      OneSignal.initialize(ONESIGNAL_APP_ID);
-      const deviceToken = await OneSignal.User.pushSubscription.getIdAsync();
-      const payload = { subscription_id: deviceToken };
-
-      await PutRequest('/users/onesignal-subscription-id', payload);
-    };
-    getData();
-  }, []);
 
   const filteredDms = useMemo(() => {
     if (!dms) return [];

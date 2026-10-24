@@ -8,7 +8,11 @@ import {
 import { PostRequest, request } from '@/utils/requests';
 
 const TOKEN_KEY = 'fcm_token';
-const nativeModule = NativeModules.FirebasePushAndroid;
+const nativeModule =
+  Platform.OS === 'ios'
+    ? NativeModules.FirebasePushIOS
+    : NativeModules.FirebasePushAndroid;
+const platformName = Platform.OS === 'ios' ? 'ios' : 'android';
 
 export type AndroidPushData = Record<string, string>;
 
@@ -42,11 +46,19 @@ const syncToken = async (nextToken: string) => {
   await AsyncStorage.setItem(TOKEN_KEY, nextToken);
   return PostRequest('/fcmtoken', {
     fcm_token: nextToken,
-    platform: 'android',
+    platform: platformName,
   });
 };
 
 export const requestAndroidNotificationPermission = async () => {
+  if (Platform.OS === 'ios') {
+    if (!nativeModule?.requestPermission) {
+      return false;
+    }
+    const granted = await nativeModule.requestPermission();
+    return granted !== false;
+  }
+
   if (Platform.OS !== 'android' || Number(Platform.Version) < 33) {
     return true;
   }
@@ -58,7 +70,7 @@ export const requestAndroidNotificationPermission = async () => {
 };
 
 export const registerAndroidPushToken = async () => {
-  if (Platform.OS !== 'android' || !nativeModule) {
+  if ((Platform.OS !== 'android' && Platform.OS !== 'ios') || !nativeModule) {
     return null;
   }
 
@@ -72,7 +84,7 @@ export const registerAndroidPushToken = async () => {
 };
 
 export const unregisterAndroidPushToken = async () => {
-  if (Platform.OS !== 'android') {
+  if (Platform.OS !== 'android' && Platform.OS !== 'ios') {
     return;
   }
 
@@ -97,7 +109,7 @@ export const unregisterAndroidPushToken = async () => {
 };
 
 export const subscribeAndroidPush = (handlers: PushHandlers) => {
-  if (Platform.OS !== 'android' || !nativeModule) {
+  if ((Platform.OS !== 'android' && Platform.OS !== 'ios') || !nativeModule) {
     return () => {};
   }
 
