@@ -1,4 +1,4 @@
-import React, { useState, forwardRef, useEffect, useMemo } from 'react';
+import React, { useState, forwardRef, useEffect, useMemo, useRef } from 'react';
 import {
   View,
   TouchableOpacity,
@@ -20,6 +20,9 @@ interface Props {
   onClose: () => void;
   channel_id: string;
 }
+
+// How long to wait for keyboardDidHide before closing the sheet anyway.
+const KEYBOARD_HIDE_TIMEOUT_MS = 600;
 
 export const AddDescription = forwardRef<any, Props>(
   ({ onClose, channel_id }, ref: any) => {
@@ -55,17 +58,38 @@ export const AddDescription = forwardRef<any, Props>(
       setLoading(false);
     };
 
+    // Removes the listener and timer of a close that is waiting for the keyboard.
+    const pendingCloseRef = useRef<(() => void) | null>(null);
+    const cancelPendingClose = () => {
+      pendingCloseRef.current?.();
+      pendingCloseRef.current = null;
+    };
+
+    useEffect(() => cancelPendingClose, []);
+
     // Closing the sheet while the keyboard is still open lets the sheet
     // re-open when the keyboard finishes hiding, so wait for it first.
+    // Android 10 and below may never send keyboardDidHide, so close after
+    // KEYBOARD_HIDE_TIMEOUT_MS anyway.
     const closeAfterKeyboardHides = () => {
+      cancelPendingClose();
       if (!Keyboard.isVisible()) {
         onClose();
         return;
       }
-      const subscription = Keyboard.addListener('keyboardDidHide', () => {
-        subscription.remove();
+      // Runs once: whichever of the event or the timer comes first closes.
+      const finish = () => {
+        if (pendingCloseRef.current !== cleanup) return;
+        cancelPendingClose();
         onClose();
-      });
+      };
+      const subscription = Keyboard.addListener('keyboardDidHide', finish);
+      const timer = setTimeout(finish, KEYBOARD_HIDE_TIMEOUT_MS);
+      const cleanup = () => {
+        subscription.remove();
+        clearTimeout(timer);
+      };
+      pendingCloseRef.current = cleanup;
       Keyboard.dismiss();
     };
 
@@ -74,6 +98,7 @@ export const AddDescription = forwardRef<any, Props>(
     };
 
     const handleClose = () => {
+      cancelPendingClose();
       onClose();
       Keyboard.dismiss();
       setSnapPoints(['35%']);

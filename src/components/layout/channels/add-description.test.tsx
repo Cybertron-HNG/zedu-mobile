@@ -42,6 +42,7 @@ jest.setTimeout(30000);
 
 describe('AddDescription', () => {
   let hideKeyboard: (() => void) | undefined;
+  let removeListener: jest.Mock;
 
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,11 +56,13 @@ describe('AddDescription', () => {
       .spyOn(Keyboard, 'addListener')
       .mockImplementation((_event: any, listener: any) => {
         hideKeyboard = listener;
-        return { remove: jest.fn() } as any;
+        removeListener = jest.fn();
+        return { remove: removeListener } as any;
       });
   });
 
   afterEach(() => {
+    jest.useRealTimers();
     jest.restoreAllMocks();
   });
 
@@ -118,6 +121,53 @@ describe('AddDescription', () => {
 
     await typeAndSave(renderer);
 
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes after a timeout when keyboardDidHide never arrives', async () => {
+    jest.useFakeTimers();
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(true);
+    const onClose = jest.fn();
+    const renderer = await renderSheet(onClose);
+
+    await typeAndSave(renderer);
+    expect(onClose).not.toHaveBeenCalled();
+
+    await ReactTestRenderer.act(() => {
+      jest.advanceTimersByTime(600);
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(removeListener).toHaveBeenCalled();
+
+    // A late keyboardDidHide does not close the sheet a second time.
+    await ReactTestRenderer.act(() => {
+      hideKeyboard?.();
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('closes only once when Cancel is tapped while waiting for the keyboard', async () => {
+    jest.useFakeTimers();
+    jest.spyOn(Keyboard, 'isVisible').mockReturnValue(true);
+    const onClose = jest.fn();
+    const renderer = await renderSheet(onClose);
+
+    await typeAndSave(renderer);
+    const cancel = renderer.root.find(
+      node =>
+        typeof node.type !== 'string' &&
+        node.props.onPress &&
+        node.props.onPress.name === 'handleClose',
+    );
+    await ReactTestRenderer.act(() => {
+      cancel.props.onPress();
+    });
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(removeListener).toHaveBeenCalled();
+
+    await ReactTestRenderer.act(() => {
+      jest.advanceTimersByTime(600);
+    });
     expect(onClose).toHaveBeenCalledTimes(1);
   });
 });
