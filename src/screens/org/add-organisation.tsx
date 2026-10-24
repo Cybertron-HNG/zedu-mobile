@@ -138,7 +138,7 @@ const AddOrganisationScreen = () => {
             </AppText>
             <TextInput
               style={styles.input}
-              placeholder="Enter your organisation Name"
+              placeholder="Enter your organisation name"
               placeholderTextColor={colors.textMuted}
               value={orgName}
               onChangeText={setOrgName}
@@ -151,7 +151,7 @@ const AddOrganisationScreen = () => {
             </AppText>
             <TextInput
               style={styles.input}
-              placeholder="What does your organisation do"
+              placeholder="What does your organisation do?"
               placeholderTextColor={colors.textMuted}
               value={orgType}
               onChangeText={setOrgType}
