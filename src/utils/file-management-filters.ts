@@ -54,7 +54,17 @@ export const filterFolders = (
   return sortFolders(result, sortBy);
 };
 
-type UploaderMember = { id: string; name?: string; username?: string };
+type UploaderMember = {
+  id: string;
+  name?: string;
+  username?: string;
+  email?: string;
+};
+
+// The label shown for a member in the "Uploaded By" sheet. Never empty, so
+// picking a member with no name or username still turns the filter on.
+export const uploaderLabel = (member: UploaderMember): string =>
+  member.name || member.username || member.email || String(member.id);
 
 /**
  * IDs of the members the "Uploaded By" filter refers to. A member picked from
