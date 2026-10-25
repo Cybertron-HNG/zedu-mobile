@@ -222,7 +222,9 @@ export const AppNavigator = ({ currentRoute }: AppNavigatorProps) => {
       return;
     }
 
-    registerAndroidPushToken().catch(() => {});
+    registerAndroidPushToken().catch(error => {
+      console.log('[FCM] failed to register device token', error);
+    });
   }, [state?.token]);
 
   useEffect(() => {

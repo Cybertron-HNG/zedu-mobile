@@ -71,16 +71,26 @@ export const requestAndroidNotificationPermission = async () => {
 
 export const registerAndroidPushToken = async () => {
   if ((Platform.OS !== 'android' && Platform.OS !== 'ios') || !nativeModule) {
+    console.log('[FCM] push module unavailable on', Platform.OS);
     return null;
   }
 
-  await requestAndroidNotificationPermission();
-  const token = await nativeModule.getToken();
-  if (!token) {
-    return null;
-  }
+  try {
+    await requestAndroidNotificationPermission();
+    const token = await nativeModule.getToken();
+    if (!token) {
+      console.log(
+        '[FCM] no device token (permission denied or APNs token not ready)',
+      );
+      return null;
+    }
 
-  return syncToken(token);
+    console.log('[FCM] device token:', token);
+    return syncToken(token);
+  } catch (error) {
+    console.log('[FCM] failed to read device token', error);
+    throw error;
+  }
 };
 
 export const unregisterAndroidPushToken = async () => {
@@ -131,7 +141,10 @@ export const subscribeAndroidPush = (handlers: PushHandlers) => {
     'FirebasePushToken',
     (payload: { token?: string }) => {
       if (payload?.token) {
-        syncToken(payload.token).catch(() => {});
+        console.log('[FCM] device token:', payload.token);
+        syncToken(payload.token).catch(error => {
+          console.log('[FCM] failed to sync device token', error);
+        });
       }
     },
   );
