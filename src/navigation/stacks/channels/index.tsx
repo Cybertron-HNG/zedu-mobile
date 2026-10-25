@@ -3,7 +3,6 @@ import { createStackNavigator } from '@react-navigation/stack';
 import ChannelHome from '@/screens/channels';
 import ChannelDetailScreen from '@/screens/channels/channel-details';
 import ChannelChatScreen from '@/screens/channels/channel-chat';
-import ChannelCallScreen from '@/screens/channels/channel-call-screen';
 import ChannelThreadScreen from '@/screens/channels/channel-thread';
 import CreateChannelScreen from '@/screens/channels/create-channel';
 import { AddMembersScreen } from '@/screens/channels/add-members';
@@ -23,7 +22,6 @@ export type ChannelStackParamList = {
   ChannelDetails: {
     channel_id: string;
   };
-  ChannelCall: undefined;
   ChannelThread: {
     channel_id: string;
     thread_id: string;
@@ -60,7 +58,6 @@ export const ChannelStack = () => (
     <Stack.Screen name="ChannelList" component={ChannelHome} />
     <Stack.Screen name="ChannelChat" component={ChannelChatScreen} />
     <Stack.Screen name="ChannelDetails" component={ChannelDetailScreen} />
-    <Stack.Screen name="ChannelCall" component={ChannelCallScreen} />
     <Stack.Screen name="ChannelThread" component={ChannelThreadScreen} />
     <Stack.Screen name="CreateChannel" component={CreateChannelScreen} />
     <Stack.Screen name="BrowseChannel" component={BrowseChannel} />
