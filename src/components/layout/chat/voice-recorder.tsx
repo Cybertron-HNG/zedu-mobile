@@ -163,12 +163,7 @@ export const VoiceRecorder = ({
         if (isRecordingRef.current) {
           await audioRecorderPlayer.stopRecorder();
         }
-      } catch (err) {
-        console.warn(
-          '[VoiceRecorder] Recorder cleanup before start failed:',
-          err,
-        );
-      }
+      } catch (_) {}
 
       const fileName = `voice_${Date.now()}.m4a`;
       let path: string;
@@ -232,12 +227,7 @@ export const VoiceRecorder = ({
       if (cancel) {
         try {
           await RNFS.unlink(uri);
-        } catch (err) {
-          console.warn(
-            '[VoiceRecorder] Could not delete cancelled recording:',
-            err,
-          );
-        }
+        } catch (_) {}
         onRecordingCancelRef.current();
       } else {
         onRecordingStopRef.current(uri);
