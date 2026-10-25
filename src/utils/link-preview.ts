@@ -15,17 +15,16 @@ const URL_IN_TEXT_REGEX =
   /((?:https?:\/\/|www\.)[^\s<"']+|\b(?:[\w-]+\.)+(?:com|co|ng|net|org|io|dev|ai|app|cc)\b(?!\.\w)(?:\/[^\s<"']*)?)/gi;
 
 /**
- * A bare domain (no http:// or www.) that directly follows "@", a dot, a dash
- * or a word character is the domain of an email address or the middle of a
- * longer name, not a link of its own, e.g. the "zedu.com" in "ada@zedu.com".
+ * A bare domain (no http:// or www.) that directly follows "@" is the domain
+ * of an email address, not a link of its own, e.g. the "zedu.com" in
+ * "ada@zedu.com". Domains after a space, a dot or a dash are still links.
  */
 const isEmbeddedBareDomain = (
   text: string,
   match: RegExpExecArray,
 ): boolean => {
   if (/^(?:https?:\/\/|www\.)/i.test(match[1])) return false;
-  const previous = text[match.index - 1];
-  return previous !== undefined && /[\w@.-]/.test(previous);
+  return text[match.index - 1] === '@';
 };
 
 const previewCache = new Map<string, LinkPreviewData | null>();

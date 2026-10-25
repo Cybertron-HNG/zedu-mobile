@@ -34,6 +34,15 @@ describe('extractMessageUrls', () => {
     ]);
   });
 
+  it('finds bare domains inside normal prose', () => {
+    expect(extractMessageUrls('See support.zedu.io for help')).toEqual([
+      https('support.zedu.io'),
+    ]);
+    expect(extractMessageUrls('Join our-team.zedu.io today')).toEqual([
+      https('our-team.zedu.io'),
+    ]);
+  });
+
   it('finds a link that comes right after an email address', () => {
     expect(extractMessageUrls('ada@zedu.com or see https://zedu.chat')).toEqual(
       ['https://zedu.chat'],
