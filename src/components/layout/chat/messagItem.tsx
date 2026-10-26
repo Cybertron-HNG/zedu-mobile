@@ -103,6 +103,7 @@ const MessageItem = ({
           key={mediaItem.id}
           activeOpacity={0.9}
           onPress={() => handleMediaPress(mediaItem)}
+          onLongPress={() => onLongPress(item)}
           style={styles.mediaContainer}
         >
           <FastImage
@@ -119,6 +120,7 @@ const MessageItem = ({
           key={mediaItem.id}
           activeOpacity={0.9}
           onPress={() => handleMediaPress(mediaItem)}
+          onLongPress={() => onLongPress(item)}
           style={styles.mediaContainer}
         >
           <View style={styles.videoWrapper}>
@@ -145,6 +147,7 @@ const MessageItem = ({
           file={mediaItem}
           widthRatio={0.65}
           onPress={() => handleFilePress(mediaItem)}
+          onLongPress={() => onLongPress(item)}
         />
       );
     }
