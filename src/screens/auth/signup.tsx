@@ -90,7 +90,14 @@ const SignupScreen: React.FC = () => {
   const handleGoogleLogin = async () => {
     setGoogleLoading(true);
 
-    const googleData = await signInWithGoogle();
+    let googleData;
+    try {
+      googleData = await signInWithGoogle();
+    } catch {
+      // Cancelled or failed (e.g. no Play Services): stop the spinner so the user can retry.
+      setGoogleLoading(false);
+      return;
+    }
     const token = googleData?.idToken;
 
     if (token) {
