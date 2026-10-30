@@ -42,6 +42,7 @@ import { FilesListQueryFilters } from '@/types/files-api';
 import {
   filterFolders,
   resolveUploaderIds,
+  uploaderApiOwner,
   sortFileResults,
 } from '@/utils/file-management-filters';
 
@@ -138,10 +139,19 @@ export const useFileManagement = (navigation: FileManagementNavigation) => {
       type:
         fileTypeFilter && fileTypeFilter !== 'all' ? fileTypeFilter : undefined,
       date_modified: dateFilter,
-      owner: uploadedByFilter,
+      owner:
+        uploaderApiOwner(orgMembers, uploadedByFilter, uploadedByMemberId) ??
+        undefined,
       file_name: debouncedFileNameSearch || undefined,
     }),
-    [fileTypeFilter, dateFilter, uploadedByFilter, debouncedFileNameSearch],
+    [
+      fileTypeFilter,
+      dateFilter,
+      orgMembers,
+      uploadedByFilter,
+      uploadedByMemberId,
+      debouncedFileNameSearch,
+    ],
   );
 
   useEffect(() => {

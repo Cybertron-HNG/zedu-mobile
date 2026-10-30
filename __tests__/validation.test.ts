@@ -32,6 +32,8 @@ describe('isValidEmail', () => {
     'a@.b.c',
     'a@b.-c',
     'a@b-.c',
+    'a@-b.com',
+    'a@b..com',
   ])('rejects "%s"', email => {
     expect(isValidEmail(email)).toBe(false);
   });
