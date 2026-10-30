@@ -17,6 +17,8 @@ describe('extractMessageUrls', () => {
     'Send it to ada@school.co.uk',
     'Mail first.last@mail.google.com today',
     'ada@zedu.com.ng',
+    'Write to john.co@zedu.com',
+    'my.app@gmail.com',
   ])('does not treat the domain in an email address as a link: %s', text => {
     expect(extractMessageUrls(text)).toEqual([]);
   });

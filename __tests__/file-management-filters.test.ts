@@ -5,6 +5,7 @@
 import {
   filterFolders,
   resolveUploaderIds,
+  uploaderApiOwner,
   uploaderLabel,
 } from '@/utils/file-management-filters';
 import { Folder } from '@/types/thread';
@@ -101,5 +102,39 @@ describe('uploaderLabel', () => {
       'kemi@example.com',
     );
     expect(uploaderLabel({ id: 'u5' })).toBe('u5');
+  });
+});
+
+describe('typed email in the "Uploaded By" filter', () => {
+  it('matches a member by email', () => {
+    const members = [{ id: 'u-9', email: 'ada@example.com' }];
+    expect(resolveUploaderIds(members, 'ada@example')).toEqual(['u-9']);
+  });
+});
+
+describe('uploaderApiOwner', () => {
+  const members = [
+    { id: 'u-1', name: 'Ada Obi', username: 'ada', email: 'ada@example.com' },
+    { id: 'u-2', username: 'bisi' },
+    { id: 'u-3', email: 'chi@example.com' },
+  ];
+
+  it('sends nothing when no filter is set', () => {
+    expect(uploaderApiOwner(members, null, null)).toBeNull();
+  });
+
+  it('sends typed text as it is', () => {
+    expect(uploaderApiOwner(members, 'ada', null)).toBe('ada');
+  });
+
+  it('sends a picked member by the name or username the server can match, not by the label', () => {
+    expect(uploaderApiOwner(members, 'Ada Obi', 'u-1')).toBe('Ada Obi');
+    expect(uploaderApiOwner(members, 'bisi', 'u-2')).toBe('bisi');
+  });
+
+  it('falls back to the label for a member with no name or username', () => {
+    expect(uploaderApiOwner(members, 'chi@example.com', 'u-3')).toBe(
+      'chi@example.com',
+    );
   });
 });

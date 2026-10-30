@@ -68,8 +68,8 @@ export const uploaderLabel = (member: UploaderMember): string =>
 
 /**
  * IDs of the members the "Uploaded By" filter refers to. A member picked from
- * the sheet is matched by their ID only; typed text matches names and
- * usernames that contain it, like the server's file search.
+ * the sheet is matched by their ID only; typed text matches names, usernames
+ * and emails that contain it.
  */
 export const resolveUploaderIds = (
   members: UploaderMember[],
@@ -83,9 +83,27 @@ export const resolveUploaderIds = (
 
   return members
     .filter(member =>
-      [member.name, member.username].some(value =>
+      [member.name, member.username, member.email].some(value =>
         (value || '').toLowerCase().includes(query),
       ),
     )
     .map(member => String(member.id));
+};
+
+/**
+ * What to send as the files API's `owner` filter. The server matches it
+ * against a person's full name or username only, so a member picked from the
+ * sheet is sent by their name or username, not by the label (which can be an
+ * email or an ID). A member with neither can't be matched by the server; that
+ * needs an owner ID filter on the API.
+ */
+export const uploaderApiOwner = (
+  members: UploaderMember[],
+  filter: string | null,
+  selectedMemberId?: string | null,
+): string | null => {
+  if (!filter) return null;
+  if (!selectedMemberId) return filter;
+  const member = members.find(m => String(m.id) === String(selectedMemberId));
+  return member?.name || member?.username || filter;
 };
