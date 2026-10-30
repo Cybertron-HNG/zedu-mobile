@@ -22,8 +22,6 @@ import {
 } from '@/services/push-notifications.service';
 import { CLIENT_BASE_URL } from '@/utils/client-url';
 
-const clientBaseUrl = CLIENT_BASE_URL;
-
 /**
  * Welcome screen with sign-up and login entry points and the legal links.
  */
@@ -110,7 +108,7 @@ const WelcomeScreen: React.FC = () => {
             <AppText
               size={13}
               style={styles.linkText}
-              onPress={() => openURL(`${clientBaseUrl}/policy`)}
+              onPress={() => openURL(`${CLIENT_BASE_URL}/policy`)}
             >
               Privacy Policy
             </AppText>{' '}
@@ -118,7 +116,7 @@ const WelcomeScreen: React.FC = () => {
             <AppText
               size={13}
               style={styles.linkText}
-              onPress={() => openURL(`${clientBaseUrl}/terms-of-service`)}
+              onPress={() => openURL(`${CLIENT_BASE_URL}/terms-of-service`)}
             >
               Terms of Service
             </AppText>
