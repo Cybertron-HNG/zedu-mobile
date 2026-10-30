@@ -7,7 +7,7 @@ describe('normalizeClientBaseUrl', () => {
     expect(normalizeClientBaseUrl(`${origin}///`)).toBe(origin);
   });
 
-  it.each([undefined, ''])(
+  it.each([undefined, '', '   '])(
     'falls back to the Zedu web origin when the URL is %p',
     input => {
       const fallback = ['https:', '', 'zedu.chat'].join('/');
